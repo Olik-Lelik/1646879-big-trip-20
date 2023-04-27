@@ -1,7 +1,7 @@
 # Проект «Большое путешествие»
 
 * Студент: [Ольга Рябова](https://up.htmlacademy.ru/ecmascript/20/user/1646879).
-* Наставник: `Неизвестно`.
+* Наставник: [Arthur Litovko](https://github.com/baileys-li).
 
 ---
 
