@@ -1,3 +1,4 @@
+/** @type {Record<string, InsertPosition>} */
 const RenderPosition = {
   BEFOREBEGIN: 'beforebegin',
   AFTERBEGIN: 'afterbegin',
@@ -5,6 +6,10 @@ const RenderPosition = {
   AFTEREND: 'afterend',
 };
 
+/**
+ * @param {string} template parsable to html
+ * @return {Element}
+ */
 function createElement(template) {
   const newElement = document.createElement('div');
   newElement.innerHTML = template;
@@ -12,7 +17,12 @@ function createElement(template) {
   return newElement.firstElementChild;
 }
 
-function render(component, container, place = RenderPosition.BEFOREEND) {
+/**
+ * @param {Element} container
+ * @param {{getElement(): Element}} component
+ * @param {InsertPosition} place
+ */
+function render(container, component, place = RenderPosition.BEFOREEND) {
   container.insertAdjacentElement(place, component.getElement());
 }
 
