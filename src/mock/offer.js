@@ -6,14 +6,14 @@ const createOffersList = (type) => {
 
   return {
     id: crypto.randomUUID(),
-    title: `${type}`,
+    title: type,
     price: `${price}`
   };
 };
 
 const createOffers = (type) => ({
   type,
-  offers: Array.from({length: getRandom(0, VALUE)}, createOffersList)
+  offers: Array.from({length: getRandom(0, VALUE)}, () => createOffersList(type))
 });
 
 export {createOffers};
