@@ -9,15 +9,32 @@ const controlsFiltersElement = document.querySelector('.trip-controls__filters')
 export default class Presenter {
   tripListComponent = new ListView();
 
-  /** скорее всего будем получать тут модельки всех точек */
+  /** скорее всего будем получать тут модели всех точек */
   constructor({container}) {
     this.container = container;
+    // this.destinationsModel = destinationsModel;
+    // this.offersModel = offersModel;
+    // this.pointsModel = pointsModel;
+
+    // this.points = [...pointsModel.get()];
+
   }
 
-  init() {
+  init({destinationsModel, offersModel, pointsModel}) {
     render(controlsFiltersElement, new FiltersView());
     render(this.container, new SortView());
     render(this.container, this.tripListComponent);
-    new PointPresenter(this.tripListComponent.getElement());
+
+    // console.log(destinationsModel)
+    // console.log(this.offersModel)
+    // console.log(this.points)
+
+    new PointPresenter({
+      container: this.tripListComponent.getElement(),
+      destinationsModel,
+      offersModel,
+      pointsModel,
+    });
+
   }
 }
