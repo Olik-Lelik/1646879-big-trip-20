@@ -1,7 +1,7 @@
 import {render} from '../render.js';
 
 import FormView from '../view/trip-form.js';
-import PointView from '../view/trip-point.js';
+import PointView from '../view/trip-point';
 import ItemView from '../view/trip-item.js';
 
 // const NUMBER_ITEM = 3;
@@ -16,10 +16,6 @@ export default class PointPresenter {
    */
   constructor({container, destinationsModel, offersModel, pointsModel}) {
     this.container = container;
-    // this.destinations = destinations;
-    // this.offers = offers;
-    // this.points = points;
-
     this.destinations = destinationsModel;
     this.offers = offersModel;
     this.points = [...pointsModel.get()];

@@ -1,8 +1,8 @@
 import {RenderPosition, render} from './render.js';
 import TripInfo from './view/trip-info.js';
 import Presenter from './presenter/presenter.js';
-import MockModel from './model/mock-model.js';
-import DestinationsModel from './model/destination-model.js';
+import MockModel from './model/mock-model.ts';
+import DestinationsModel from './model/destination-model';
 import OffersModel from './model/offers-model.js';
 import PointsModel from './model/points-model.js';
 
