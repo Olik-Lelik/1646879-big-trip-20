@@ -19,7 +19,7 @@ jobs:
       name: Checkout
 
     - name: Install dependencies
-      run: pnpm i
+      run: pnpm install
 
     - name: Run checks
       run: pnpm lint
