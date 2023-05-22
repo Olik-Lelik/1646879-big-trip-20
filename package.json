@@ -34,5 +34,6 @@
   },
   "dependencies": {
     "dayjs": "1.11.7"
-  }
+  },
+  "packageManager": "pnpm@8.5.1"
 }
