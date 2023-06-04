@@ -1,4 +1,4 @@
-import {render} from './framework/render.js';
+import {render} from '../framework/render.js';
 
 import FormView from '../view/trip-form.js';
 import PointView from '../view/trip-point';

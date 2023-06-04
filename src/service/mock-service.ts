@@ -1,4 +1,4 @@
-import { getRandomArrayElement, getBoolean } from '../utils';
+import { getRandomArrayElement } from '../utils';
 import { VALUE, TYPES } from '../const';
 import { createPoint } from '../mock/point';
 import { createDestination } from '../mock/destination';

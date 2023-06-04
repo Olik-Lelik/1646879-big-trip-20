@@ -1,6 +1,6 @@
 import TripInfo from './view/trip-info.js';
 import Presenter from './presenter/presenter.js';
-import MockService from './service/mock-model.js';
+import MockService from './service/mock-service';
 import DestinationsModel from './model/destination-model';
 import OffersModel from './model/offers-model.js';
 import PointsModel from './model/points-model.js';
