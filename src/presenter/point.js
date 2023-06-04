@@ -1,4 +1,4 @@
-import {render} from '../render.js';
+import {render} from './framework/render.js';
 
 import FormView from '../view/trip-form.js';
 import PointView from '../view/trip-point';
@@ -28,7 +28,7 @@ export default class PointPresenter {
 
   updateItemView() {
     return this.points.forEach((point) => render(
-      this.itemView.getElement(),
+      this.itemView.element,
       new PointView({
         point,
         pointDestination: this.destinations.getById(point.destination),
@@ -39,7 +39,7 @@ export default class PointPresenter {
 
   updateFormView() {
     return render(
-      this.itemView.getElement(),
+      this.itemView.element,
       new FormView({
         point: this.points[0],
         pointDestinations: this.destinations.get(),

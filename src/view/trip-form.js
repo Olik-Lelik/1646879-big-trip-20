@@ -1,6 +1,6 @@
 import dayjs from 'dayjs';
 import { TYPES } from '../const';
-import { createElement } from '../render.js';
+import AbstractView from '../framework/view/abstract-view';
 
 function getOffersByType(offers, type) {
   return offers
@@ -127,29 +127,23 @@ function createTemplate({point, pointDestinations, pointOffers}) {
 </form>`;
 }
 
-export default class FormView {
+export default class FormView extends AbstractView {
+  #point = null;
+  #pointDestinations = null;
+  #pointOffers = null;
+
   constructor({point, pointDestinations, pointOffers}) {
-    this.point = point;
-    this.pointDestinations = pointDestinations;
-    this.pointOffers = pointOffers;
+    super();
+    this.#point = point;
+    this.#pointDestinations = pointDestinations;
+    this.#pointOffers = pointOffers;
   }
 
-  getTemplate() {
+  get template() {
     return createTemplate({
-      point: this.point,
-      pointDestinations: this.pointDestinations,
-      pointOffers: this.pointOffers
+      point: this.#point,
+      pointDestinations: this.#pointDestinations,
+      pointOffers: this.#pointOffers
     });
-  }
-
-  getElement() {
-    if (!this.element) {
-      this.element = createElement(this.getTemplate());
-    }
-    return this.element;
-  }
-
-  removeElement() {
-    this.element = null;
   }
 }

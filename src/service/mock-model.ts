@@ -5,7 +5,7 @@ import { createDestination } from '../mock/destination';
 import { createOffers } from '../mock/offer';
 import { Destination, Offer, Point } from '../types/types';
 
-export default class MockModel {
+export default class MockService {
   #destinations: Destination[] = [];
   #offers: Offer[] = [];
   #points: Point[] = [];

@@ -1,15 +1,15 @@
-import {RenderPosition, render} from './render.js';
 import TripInfo from './view/trip-info.js';
 import Presenter from './presenter/presenter.js';
-import MockModel from './model/mock-model.ts';
+import MockService from './service/mock-model.js';
 import DestinationsModel from './model/destination-model';
 import OffersModel from './model/offers-model.js';
 import PointsModel from './model/points-model.js';
+import { RenderPosition, render } from './framework/render.js';
 
 const siteHeaderElement = document.querySelector('.trip-main');
 const siteMainElement = document.querySelector('.trip-events');
 
-const mock = new MockModel();
+const mock = new MockService();
 const destinationsModel = new DestinationsModel(mock);
 const offersModel = new OffersModel(mock);
 const pointsModel = new PointsModel(mock);

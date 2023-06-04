@@ -1,4 +1,4 @@
-import {render} from '../render.js';
+import {render} from './framework/render.js';
 import FiltersView from '../view/trip-filters.js';
 import SortView from '../view/trip-sort.js';
 import ListView from '../view/trip-list.js';
@@ -9,7 +9,6 @@ const controlsFiltersElement = document.querySelector('.trip-controls__filters')
 export default class Presenter {
   tripListComponent = new ListView();
 
-  /** скорее всего будем получать тут модели всех точек */
   constructor({container}) {
     this.container = container;
     // this.destinationsModel = destinationsModel;
@@ -25,12 +24,8 @@ export default class Presenter {
     render(this.container, new SortView());
     render(this.container, this.tripListComponent);
 
-    // console.log(destinationsModel)
-    // console.log(this.offersModel)
-    // console.log(this.points)
-
     new PointPresenter({
-      container: this.tripListComponent.getElement(),
+      container: this.tripListComponent.element,
       destinationsModel,
       offersModel,
       pointsModel,

@@ -1,4 +1,4 @@
-import { createElement } from '../render.js';
+import AbstractView from '../framework/view/abstract-view.js';
 
 const FilterType = {
   PAST: 'There are no past events now',
@@ -27,26 +27,15 @@ function getMessage({status = 'loading', chosenFilter}) {
 }
 
 /** View to show message when data are loading or now events exists */
-export default class MessageView {
+export default class MessageView extends AbstractView{
 
   /** @param {Option} options  */
   constructor(options) {
+    super();
     this.message = getMessage(options);
   }
 
-  getTemplate() {
+  gettTemplate() {
     return `<p class="trip-events__msg">${this.message}</p>`;
-  }
-
-  getElement() {
-    if (!this.element) {
-      this.element = createElement(this.getTemplate());
-    }
-
-    return this.element;
-  }
-
-  removeElement() {
-    this.element = null;
   }
 }

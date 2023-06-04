@@ -1,4 +1,4 @@
-import {createElement} from '../render.js';
+import AbstractView from '../framework/view/abstract-view';
 import{ getDateDuration, formatStringToDateTime, formatStringToShortDateTime, formatStringToHumanizeDateTime, formatStringToTime } from '../utils';
 
 const createOfferItem = ({title, price}) => /*html*/`<li class="event__offer">
@@ -46,30 +46,24 @@ function createTemplate({point, pointDestination, pointOffers}) {
   </div>`;
 }
 
-export default class PointView {
+export default class PointView extends AbstractView {
+  #point = null;
+  #pointDestination = null;
+  #pointOffers = null;
+
   constructor({point, pointDestination, pointOffers}) {
-    this.point = point;
-    this.pointDestination = pointDestination;
-    this.pointOffers = pointOffers;
+    super();
+    this.#point = point;
+    this.#pointDestination = pointDestination;
+    this.#pointOffers = pointOffers;
   }
 
-  getTemplate() {
+  get template() {
     return createTemplate({
-      point: this.point,
-      pointDestination: this.pointDestination,
-      pointOffers: this.pointOffers
+      point: this.#point,
+      pointDestination: this.#pointDestination,
+      pointOffers: this.#pointOffers
     });
-  }
-
-  getElement() {
-    if (!this.element) {
-      this.element = createElement(this.getTemplate());
-    }
-    return this.element;
-  }
-
-  removeElement() {
-    this.element = null;
   }
 }
 
