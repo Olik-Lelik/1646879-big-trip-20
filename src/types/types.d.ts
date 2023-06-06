@@ -1,3 +1,4 @@
+import dayjs from "dayjs";
 import { TYPES, CITIES } from "../const";
 
 type OfferType = typeof TYPES[number];
@@ -29,11 +30,11 @@ interface Offer {
 interface Point {
     id: string,
     price: number,
-    dateFrom: string,
-    dateTo: string,
+    dateFrom: Date,
+    dateTo: Date,
     destination: string,
     favorite: boolean,
-    offers: Array<string>,
+    offers: OfferItem['id'][],
     type: OfferType
 }
 

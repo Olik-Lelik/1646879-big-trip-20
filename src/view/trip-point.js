@@ -13,7 +13,8 @@ function createTemplate({point, pointDestination, pointOffers}) {
 
   const hasFavorite = favorite > 0 ? '--active' : '';
 
-  return `<div class="event">
+  return `<li class="trip-events__item">
+  <div class="event">
     <time class="event__date" datetime="${formatStringToShortDateTime(dateFrom)}">${formatStringToHumanizeDateTime(dateFrom)}</time>
     <div class="event__type">
       <img class="event__type-icon" width="42" height="42" src="img/icons/${type}.png" alt="Event type icon">
@@ -43,19 +44,24 @@ function createTemplate({point, pointDestination, pointOffers}) {
     <button class="event__rollup-btn" type="button">
       <span class="visually-hidden">Open event</span>
     </button>
-  </div>`;
+  </div>
+  </li>`;
 }
 
 export default class PointView extends AbstractView {
   #point = null;
   #pointDestination = null;
   #pointOffers = null;
+  #onEditClick = null;
 
-  constructor({point, pointDestination, pointOffers}) {
+  constructor({point, pointDestination, pointOffers, onEditClick}) {
     super();
     this.#point = point;
     this.#pointDestination = pointDestination;
     this.#pointOffers = pointOffers;
+    this.#onEditClick = onEditClick;
+    this.element.querySelector('.event__rollup-btn')
+      .addEventListener('click', this.#editClickHandler);
   }
 
   get template() {
@@ -65,5 +71,10 @@ export default class PointView extends AbstractView {
       pointOffers: this.#pointOffers
     });
   }
+
+  #editClickHandler = (evt) => {
+    evt.preventDefault();
+    this.#onEditClick();
+  };
 }
 

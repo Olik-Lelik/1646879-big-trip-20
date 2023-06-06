@@ -6,44 +6,44 @@ import { createOffers } from '../mock/offer';
 import { Destination, Offer, Point } from '../types/types';
 
 export default class MockService {
-  #destinations: Destination[] = [];
-  #offers: Offer[] = [];
-  #points: Point[] = [];
+  #destinations: Destination[];
+  #offers: Offer[];
+  #points: Point[];
 
   constructor() {
-    this.#destinations = this.generateDestinations();
-    this.#offers = this.generateOffers();
-    this.#points = this.generatePoints();
+    this.#destinations = this.generateDestinations;
+    this.#offers = this.generateOffers;
+    this.#points = this.generatePoints;
   }
 
-  getDestinations() {
+  get destinations() {
     return this.#destinations;
   }
 
-  getOffers() {
+  get offers() {
     return this.#offers;
   }
 
-  getPoints() {
+  get points() {
     return this.#points;
   }
 
-  generateDestinations() {
+  get generateDestinations() {
     return Array.from({length: VALUE}, createDestination);
   }
 
-  generateOffers() {
+  get generateOffers() {
     return TYPES.map(createOffers);
   }
 
-  generatePoints() {
+  get generatePoints() {
     return Array.from({length: VALUE}, () => {
       const type = getRandomArrayElement(TYPES);
       const destination = getRandomArrayElement(this.#destinations);
 
       const {offers} = this.#offers.find((offer) => offer.type === type);
 
-      const offerIds = offers ? offers
+      const offerIds = offers.length > 0 ? offers
         .map(({id}) => id) : [];
 
       return createPoint(type, destination.id, offerIds);

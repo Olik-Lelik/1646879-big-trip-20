@@ -12,8 +12,9 @@ function getOfferById(destinations, id) {
     .find((destination) => destination.id === id);
 }
 
-const createDestinationOption = ({name}) =>
-/*html*/ `<option value="${name}"></option>`;
+function createDestinationOption({name}){
+/*html*/return `<option value="${name}"></option>`;
+}
 
 function createEventTypeItem(type, point) {
   return /*html*/ `<div class="event__type-item">
@@ -71,8 +72,9 @@ function createTemplate({point, pointDestinations, pointOffers}) {
   const destination = getOfferById(pointDestinations, point.destination);
   const offers = getOffersByType(pointOffers, point.type);
 
-  return /*html*/`<form class="event event--edit" action="#" method="post">
-<header class="event__header">
+  return /*html*/`<li class="trip-events__item">
+  <form class="event event--edit" action="#" method="post">
+  <header class="event__header">
   <div class="event__type-wrapper">
     <label class="event__type  event__type-btn" for="event-type-toggle-1">
       <span class="visually-hidden">Choose event type</span>
@@ -119,24 +121,35 @@ function createTemplate({point, pointDestinations, pointOffers}) {
   <button class="event__rollup-btn" type="button">
   <span class="visually-hidden">Open event</span>
   </button>
-</header>
-<section class="event__details">
+  </header>
+  <section class="event__details">
   ${createEventOffersSection(offers, point)}
   ${createEventDestinationSection(destination)}
-</section>
-</form>`;
+  </section>
+  </form>
+  </li>`;
 }
 
 export default class FormView extends AbstractView {
   #point = null;
   #pointDestinations = null;
   #pointOffers = null;
+  #onResetClick = null;
+  #onFormSubmit = null;
 
-  constructor({point, pointDestinations, pointOffers}) {
+  constructor({point, pointDestinations, pointOffers, onResetClick, onFormSubmit}) {
     super();
     this.#point = point;
     this.#pointDestinations = pointDestinations;
     this.#pointOffers = pointOffers;
+    this.#onResetClick = onResetClick;
+    this.#onFormSubmit = onFormSubmit;
+
+    this.element.querySelector('form')
+      .addEventListener('submit', this.#formSubmitHandler);
+
+    this.element.querySelector('.event__rollup-btn')
+      .addEventListener('click', this.#buttonRollupHandler);
   }
 
   get template() {
@@ -146,4 +159,14 @@ export default class FormView extends AbstractView {
       pointOffers: this.#pointOffers
     });
   }
+
+  #formSubmitHandler = (evt) => {
+    evt.preventDefault();
+    this.#onFormSubmit();
+  };
+
+  #buttonRollupHandler = (evt) => {
+    evt.preventDefault();
+    this.#onResetClick();
+  };
 }

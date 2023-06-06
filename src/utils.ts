@@ -30,21 +30,17 @@ const getRandomArrayElement = <Element extends any>(elements: Element[] | readon
 
 const getBoolean = () => Boolean(getRandom(0, 1));
 
-function getDateFrom() {
-  return dayjs()
+const getDateFrom = () => dayjs()
   .subtract(getRandom(0, Duration.Day), 'd')
   .subtract(getRandom(0, Duration.Hour), 'h')
-  .subtract(getRandom(0, Duration.Min), 'm').toISOString()
-}
+  .subtract(getRandom(0, Duration.Min), 'm').toDate()
 
-function getDateTo(date: string) {
-  return dayjs(date)
+const getDateTo = (date: Date) => dayjs(date)
   .add(getRandom(0, Duration.Day), 'd')
   .add(getRandom(0, Duration.Hour), 'h')
-  .add(getRandom(0, Duration.Min), 'm').toISOString()
-}
+  .add(getRandom(0, Duration.Min), 'm').toDate()
 
-function getDateDuration(dateTo: string, dateFrom: string) {
+function getDateDuration(dateTo: Date, dateFrom: Date) {
   const timeDiff = dayjs(dateTo).diff(dayjs(dateFrom));
 
   let pointDuration = '0';
@@ -60,19 +56,19 @@ function getDateDuration(dateTo: string, dateFrom: string) {
   return pointDuration;
 }
 
-function formatStringToDateTime(date: string) {
+function formatStringToDateTime(date: Date) {
   return dayjs(date).format('YYYY-MM-DDTHH:mm')
 }
 
-function formatStringToShortDateTime(date: string) {
+function formatStringToShortDateTime(date: Date) {
   return dayjs(date).format('YYYY-MM-DD')
 }
 
-function formatStringToHumanizeDateTime(date: string) {
+function formatStringToHumanizeDateTime(date: Date) {
   return dayjs(date).format('MMM DD')
 }
 
-function formatStringToTime(date: string) {
+function formatStringToTime(date: Date) {
   return dayjs(date).format('HH:mm')
 }
 
