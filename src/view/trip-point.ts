@@ -1,19 +1,21 @@
-import {createElement} from '../render.js';
+import AbstractView from '../framework/view/abstract-view';
+import { Destination, OfferItem, Point } from '../types/types';
 import{ getDateDuration, formatStringToDateTime, formatStringToShortDateTime, formatStringToHumanizeDateTime, formatStringToTime } from '../utils';
 
-const createOfferItem = ({title, price}) => /*html*/`<li class="event__offer">
+const createOfferItem = ({title, price}: OfferItem) => /*html*/`<li class="event__offer">
 <span class="event__offer-title">${title}</span>
 &plus;&euro;&nbsp;
 <span class="event__offer-price">${price}</span>
 </li>`;
 
 
-function createTemplate({point, pointDestination, pointOffers}) {
+function createTemplate({point, pointDestination, pointOffers}: GeneralProps) {
   const {price, dateFrom, dateTo, favorite, type} = point;
 
-  const hasFavorite = favorite > 0 ? '--active' : '';
+  const hasFavorite = favorite ? '--active' : '';
 
-  return `<div class="event">
+  return `<li class="trip-events__item">
+  <div class="event">
     <time class="event__date" datetime="${formatStringToShortDateTime(dateFrom)}">${formatStringToHumanizeDateTime(dateFrom)}</time>
     <div class="event__type">
       <img class="event__type-icon" width="42" height="42" src="img/icons/${type}.png" alt="Event type icon">
@@ -43,33 +45,47 @@ function createTemplate({point, pointDestination, pointOffers}) {
     <button class="event__rollup-btn" type="button">
       <span class="visually-hidden">Open event</span>
     </button>
-  </div>`;
+  </div>
+  </li>`;
 }
 
-export default class PointView {
-  constructor({point, pointDestination, pointOffers}) {
-    this.point = point;
-    this.pointDestination = pointDestination;
-    this.pointOffers = pointOffers;
+interface GeneralProps {
+  point: Point;
+  pointDestination: Destination;
+  pointOffers: OfferItem[];
+}
+
+type PointViewProps = GeneralProps & {
+  onEditClick(): void;
+}
+
+export default class PointView extends AbstractView {
+  #point: Point;
+  #pointDestination: Destination;
+  #pointOffers: OfferItem[] = null;
+  #onEditClick: () => void;
+
+  constructor({point, pointDestination, pointOffers, onEditClick}: PointViewProps) {
+    super();
+    this.#point = point;
+    this.#pointDestination = pointDestination;
+    this.#pointOffers = pointOffers;
+    this.#onEditClick = onEditClick;
+    this.element.querySelector<HTMLButtonElement>('.event__rollup-btn')
+      .addEventListener('click', this.#editClickHandler);
   }
 
-  getTemplate() {
+  get template() {
     return createTemplate({
-      point: this.point,
-      pointDestination: this.pointDestination,
-      pointOffers: this.pointOffers
+      point: this.#point,
+      pointDestination: this.#pointDestination,
+      pointOffers: this.#pointOffers
     });
   }
 
-  getElement() {
-    if (!this.element) {
-      this.element = createElement(this.getTemplate());
-    }
-    return this.element;
-  }
-
-  removeElement() {
-    this.element = null;
-  }
+  #editClickHandler = (evt: Event) => {
+    evt.preventDefault();
+    this.#onEditClick();
+  };
 }
 

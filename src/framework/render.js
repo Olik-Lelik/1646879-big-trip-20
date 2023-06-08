@@ -22,11 +22,11 @@ function createElement(template) {
 
 /**
  * Функция для отрисовки элемента
- * @param {AbstractView} component Компонент, который должен был отрисован
  * @param {HTMLElement} container Элемент в котором будет отрисован компонент
+ * @param {AbstractView} component Компонент, который должен был отрисован
  * @param {string} place Позиция компонента относительно контейнера. По умолчанию - `beforeend`
  */
-function render(component, container, place = RenderPosition.BEFOREEND) {
+function render(container, component, place = RenderPosition.BEFOREEND) {
   if (!(component instanceof AbstractView)) {
     throw new Error('Can render only components');
   }

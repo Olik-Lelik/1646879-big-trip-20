@@ -1,34 +1,36 @@
 import dayjs from 'dayjs';
 import { TYPES } from '../const';
-import { createElement } from '../render.js';
+import AbstractView from '../framework/view/abstract-view';
+import { Destination, Offer, OfferItem, Picture, Point } from '../types/types';
 
-function getOffersByType(offers, type) {
+function getOffersByType(offers: Offer[], type: Point['type']) {
   return offers
     .find((offer) => offer.type === type).offers;
 }
 
-function getOfferById(destinations, id) {
+function getOfferById(destinations: Destination[], id: Point['destination']) {
   return destinations
     .find((destination) => destination.id === id);
 }
 
-const createDestinationOption = ({name}) =>
-/*html*/ `<option value="${name}"></option>`;
+function createDestinationOption(name: Destination){
+/*html*/return `<option value="${name}"></option>`;
+}
 
-function createEventTypeItem(type, point) {
+function createEventTypeItem(type: Offer['type'], point: Point) {
   return /*html*/ `<div class="event__type-item">
 <input id="event-type-${type}" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${type}" ${point.type === type ? 'checked' : ''}>
 <label class="event__type-label  event__type-label--${type}" for="event-type-${type}">${type}</label>
 </div>`;
 }
 
-function createEventOffersSection(offers, point) {
+function createEventOffersSection(offers: Offer['offers'], point: Point) {
   return(
     (offers.length > 0) ? `<section class="event__section  event__section--offers">
   <h3 class="event__section-title  event__section-title--offers">Offers</h3>
 
   <div class="event__available-offers">
-    ${offers.map(({id, title, price}) => /*html*/ `<div class="event__offer-selector">
+    ${offers.map(({id, title, price}: OfferItem) => /*html*/ `<div class="event__offer-selector">
     <input class="event__offer-checkbox  visually-hidden" id="event-offer-${id}" type="checkbox" name="event-offer-${point.type}" checked>
     <label class="event__offer-label" for="event-offer-${id}">
       <span class="event__offer-title">${title}</span>
@@ -40,11 +42,11 @@ function createEventOffersSection(offers, point) {
 </section>` : '');
 }
 
-function createDestinationDescription(description, name) {
+function createDestinationDescription(description: Destination['description'], name: Destination['name']) {
   return (description.length > 0 ? `<p class="event__destination-description">${name} - ${description}</p>` : '');
 }
 
-function createDestinationFotos(pictures) {
+function createDestinationPhotos(pictures: Picture[]) {
   return (pictures.length > 0 ?
     `<div class="event__photos-container">
     <div class="event__photos-tape">
@@ -53,7 +55,7 @@ function createDestinationFotos(pictures) {
     </div>` : '');
 }
 
-function createEventDestinationSection(destination) {
+function createEventDestinationSection(destination: Destination) {
   const {description, name, pictures} = destination;
 
   return(
@@ -61,18 +63,19 @@ function createEventDestinationSection(destination) {
     /*html*/ `<section class="event__section  event__section--destination">
   <h3 class="event__section-title  event__section-title--destination">Destination</h3>
   ${createDestinationDescription(description, name)}
-  ${createDestinationFotos(pictures)}
+  ${createDestinationPhotos(pictures)}
   </section>` : '');
 }
 
-function createTemplate({point, pointDestinations, pointOffers}) {
+function createTemplate({point, pointDestinations, pointOffers}: GeneralProps) {
   const {price, dateFrom, dateTo} = point;
 
   const destination = getOfferById(pointDestinations, point.destination);
   const offers = getOffersByType(pointOffers, point.type);
 
-  return /*html*/`<form class="event event--edit" action="#" method="post">
-<header class="event__header">
+  return /*html*/`<li class="trip-events__item">
+  <form class="event event--edit" action="#" method="post">
+  <header class="event__header">
   <div class="event__type-wrapper">
     <label class="event__type  event__type-btn" for="event-type-toggle-1">
       <span class="visually-hidden">Choose event type</span>
@@ -119,37 +122,63 @@ function createTemplate({point, pointDestinations, pointOffers}) {
   <button class="event__rollup-btn" type="button">
   <span class="visually-hidden">Open event</span>
   </button>
-</header>
-<section class="event__details">
+  </header>
+  <section class="event__details">
   ${createEventOffersSection(offers, point)}
   ${createEventDestinationSection(destination)}
-</section>
-</form>`;
+  </section>
+  </form>
+  </li>`;
 }
 
-export default class FormView {
-  constructor({point, pointDestinations, pointOffers}) {
-    this.point = point;
-    this.pointDestinations = pointDestinations;
-    this.pointOffers = pointOffers;
+interface GeneralProps {
+  point: Point;
+  pointDestinations: Destination[];
+  pointOffers: Offer[];
+}
+
+type FormViewProps = GeneralProps & {
+  onRollupClick(): void;
+  onFormSubmit(): void;
+}
+
+export default class FormView extends AbstractView {
+  #point: Point;
+  #pointDestinations: Destination[];
+  #pointOffers: Offer[];
+  #onRollupClick: () => void;
+  #onFormSubmit: () => void;
+
+  constructor({point, pointDestinations, pointOffers, onRollupClick, onFormSubmit}: FormViewProps) {
+    super();
+    this.#point = point;
+    this.#pointDestinations = pointDestinations;
+    this.#pointOffers = pointOffers;
+    this.#onRollupClick = onRollupClick;
+    this.#onFormSubmit = onFormSubmit;
+
+    this.element.querySelector('form')
+      .addEventListener('submit', this.#formSubmitHandler);
+
+    this.element.querySelector<HTMLButtonElement>('.event__rollup-btn')
+      .addEventListener('click', this.#buttonRollupHandler);
   }
 
-  getTemplate() {
+  get template() {
     return createTemplate({
-      point: this.point,
-      pointDestinations: this.pointDestinations,
-      pointOffers: this.pointOffers
+      point: this.#point,
+      pointDestinations: this.#pointDestinations,
+      pointOffers: this.#pointOffers
     });
   }
 
-  getElement() {
-    if (!this.element) {
-      this.element = createElement(this.getTemplate());
-    }
-    return this.element;
-  }
+  #formSubmitHandler = (evt: SubmitEvent) => {
+    evt.preventDefault();
+    this.#onFormSubmit();
+  };
 
-  removeElement() {
-    this.element = null;
-  }
+  #buttonRollupHandler = (evt: Event) => {
+    evt.preventDefault();
+    this.#onRollupClick();
+  };
 }
