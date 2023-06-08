@@ -22,8 +22,8 @@ function createElement(template) {
 
 /**
  * Функция для отрисовки элемента
- * @param {AbstractView} component Компонент, который должен был отрисован
  * @param {HTMLElement} container Элемент в котором будет отрисован компонент
+ * @param {AbstractView} component Компонент, который должен был отрисован
  * @param {string} place Позиция компонента относительно контейнера. По умолчанию - `beforeend`
  */
 function render(container, component, place = RenderPosition.BEFOREEND) {

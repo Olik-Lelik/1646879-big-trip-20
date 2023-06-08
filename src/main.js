@@ -1,4 +1,4 @@
-import TripInfo from './view/trip-info.js';
+import TripInfo from './view/trip-info';
 import Presenter from './presenter/presenter';
 import MockService from './service/mock-service';
 import {DestinationsModel, OffersModel, PointsModel} from './model';

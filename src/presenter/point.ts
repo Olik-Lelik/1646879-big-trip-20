@@ -1,9 +1,10 @@
 import {render, replace} from '../framework/render.js';
 
-import FormView from '../view/trip-form.js';
-import PointView from '../view/trip-point.js';
+import FormView from '../view/trip-form';
+import PointView from '../view/trip-point';
 // import ItemView from '../view/trip-item.js';
 import {DestinationsModel, OffersModel, PointsModel} from '../model';
+import { Point } from '../types/types.js';
 
 interface Model {
   container: Element,
@@ -16,7 +17,7 @@ export default class PointPresenter {
   #container;
   #destinations;
   #offers;
-  #points;
+  #points: Point[];
 
   constructor({container, destinationsModel, offersModel, pointsModel}: Model) {
     this.#container = container;
@@ -27,7 +28,7 @@ export default class PointPresenter {
     this.#points.forEach((point) => this.#renderItemView(point));
   }
 
-  #renderItemView(point: any) {
+  #renderItemView(point: Point) {
     const itemView = new PointView({
       point,
       pointDestination: this.#destinations.getById(point.destination),
@@ -39,7 +40,7 @@ export default class PointPresenter {
       point,
       pointDestinations: this.#destinations.get,
       pointOffers: this.#offers.get,
-      onResetClick: buttonRollupHandler,
+      onRollupClick: buttonRollupHandler,
       onFormSubmit: formSubmitHandler
     })
 

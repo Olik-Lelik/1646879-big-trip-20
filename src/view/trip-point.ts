@@ -1,17 +1,18 @@
 import AbstractView from '../framework/view/abstract-view';
+import { Destination, OfferItem, Point } from '../types/types';
 import{ getDateDuration, formatStringToDateTime, formatStringToShortDateTime, formatStringToHumanizeDateTime, formatStringToTime } from '../utils';
 
-const createOfferItem = ({title, price}) => /*html*/`<li class="event__offer">
+const createOfferItem = ({title, price}: OfferItem) => /*html*/`<li class="event__offer">
 <span class="event__offer-title">${title}</span>
 &plus;&euro;&nbsp;
 <span class="event__offer-price">${price}</span>
 </li>`;
 
 
-function createTemplate({point, pointDestination, pointOffers}) {
+function createTemplate({point, pointDestination, pointOffers}: GeneralProps) {
   const {price, dateFrom, dateTo, favorite, type} = point;
 
-  const hasFavorite = favorite > 0 ? '--active' : '';
+  const hasFavorite = favorite ? '--active' : '';
 
   return `<li class="trip-events__item">
   <div class="event">
@@ -48,19 +49,29 @@ function createTemplate({point, pointDestination, pointOffers}) {
   </li>`;
 }
 
-export default class PointView extends AbstractView {
-  #point = null;
-  #pointDestination = null;
-  #pointOffers = null;
-  #onEditClick = null;
+interface GeneralProps {
+  point: Point;
+  pointDestination: Destination;
+  pointOffers: OfferItem[];
+}
 
-  constructor({point, pointDestination, pointOffers, onEditClick}) {
+type PointViewProps = GeneralProps & {
+  onEditClick(): void;
+}
+
+export default class PointView extends AbstractView {
+  #point: Point;
+  #pointDestination: Destination;
+  #pointOffers: OfferItem[] = null;
+  #onEditClick: () => void;
+
+  constructor({point, pointDestination, pointOffers, onEditClick}: PointViewProps) {
     super();
     this.#point = point;
     this.#pointDestination = pointDestination;
     this.#pointOffers = pointOffers;
     this.#onEditClick = onEditClick;
-    this.element.querySelector('.event__rollup-btn')
+    this.element.querySelector<HTMLButtonElement>('.event__rollup-btn')
       .addEventListener('click', this.#editClickHandler);
   }
 
@@ -72,7 +83,7 @@ export default class PointView extends AbstractView {
     });
   }
 
-  #editClickHandler = (evt) => {
+  #editClickHandler = (evt: Event) => {
     evt.preventDefault();
     this.#onEditClick();
   };

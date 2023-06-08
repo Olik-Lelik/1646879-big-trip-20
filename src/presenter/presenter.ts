@@ -1,7 +1,7 @@
 import {render} from '../framework/render.js';
-import FiltersView from '../view/trip-filters.js';
-import SortView from '../view/trip-sort.js';
-import ListView from '../view/trip-list.js';
+import FiltersView from '../view/trip-filters';
+import SortView from '../view/trip-sort';
+import ListView from '../view/trip-list';
 import PointPresenter from './point';
 import {DestinationsModel, OffersModel, PointsModel} from '../model';
 

@@ -5,16 +5,15 @@ const FilterType = {
   PRESENT: 'There are no present events now',
   FUTURE: 'There are no future events now',
   EVERYTHING: 'Click New Event to create your first point',
-};
+} as const;
 
-/**
- * @typedef Option
- * @property {'loading' | 'empty'} status
- * @property {keyof FilterType} [chosenFilter]
-* */
+interface Option {
+  status: 'loading' | 'empty',
+  chosenFilter: keyof typeof FilterType
+}
 
-/** @param {Option} options */
-function getMessage({status = 'loading', chosenFilter}) {
+
+function getMessage({status = 'loading', chosenFilter}: Option) {
   if (status === 'loading') {
     return 'Loading...';
   }
@@ -28,14 +27,14 @@ function getMessage({status = 'loading', chosenFilter}) {
 
 /** View to show message when data are loading or now events exists */
 export default class MessageView extends AbstractView{
+  #message;
 
-  /** @param {Option} options  */
-  constructor(options) {
+  constructor(options: Option) {
     super();
-    this.message = getMessage(options);
+    this.#message = getMessage(options);
   }
 
-  gettTemplate() {
-    return `<p class="trip-events__msg">${this.message}</p>`;
+  get template() {
+    return `<p class="trip-events__msg">${this.#message}</p>`;
   }
 }
