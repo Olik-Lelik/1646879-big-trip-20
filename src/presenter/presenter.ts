@@ -4,6 +4,7 @@ import SortView from '../view/trip-sort';
 import ListView from '../view/trip-list';
 import PointPresenter from './point';
 import {DestinationsModel, OffersModel, PointsModel} from '../model';
+import { generateFilter } from '../mock/filter.js';
 
 interface Props {
   container: Element;
@@ -26,7 +27,7 @@ export default class Presenter {
   }
 
   init({destinationsModel, offersModel, pointsModel}: Model) {
-    render(this.#controlsFiltersElement, new FiltersView());
+    render(this.#controlsFiltersElement, new FiltersView(generateFilter(pointsModel.get)));
     render(this.#container as HTMLElement, new SortView());
     render(this.#container as HTMLElement, this.#tripListComponent);
 

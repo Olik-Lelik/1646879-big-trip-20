@@ -1,6 +1,7 @@
 import dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';
-import { FORMAT_DURATION, MSEC_IN_DAY, MSEC_IN_HOUR } from './const';
+import { FORMAT_DURATION, MSEC_IN_DAY, MSEC_IN_HOUR, FilterType } from './const';
+import { Point } from './types/types';
 dayjs.extend(duration);
 
 const enum Duration {
@@ -72,6 +73,25 @@ function formatStringToTime(date: Date) {
   return dayjs(date).format('HH:mm')
 }
 
+function isPointFuture(point: Point) {
+  return dayjs().isBefore(point.dateFrom)
+}
+
+function isPointPast(point: Point) {
+  return dayjs().isAfter(point.dateTo)
+}
+
+function isPointPresent(point: Point) {
+  return (dayjs().isAfter(point.dateFrom) && dayjs().isBefore(point.dateTo))
+}
+
+const filter = {
+  [FilterType.EVERYTHING]: (points: Point[]) => [...points],
+  [FilterType.FUTURE]: (points: Point[]) => points.filter((point) => isPointFuture(point)),
+  [FilterType.PRESENT]: (points: Point[]) => points.filter((point) => isPointPresent(point)),
+  [FilterType.PAST]: (points: Point[]) => points.filter((point) => isPointPast(point)),
+}
+
 export {
   getRandom,
   getRandomArrayElement,
@@ -82,5 +102,6 @@ export {
   formatStringToDateTime,
   formatStringToShortDateTime,
   formatStringToHumanizeDateTime,
-  formatStringToTime
+  formatStringToTime,
+  filter,
 };

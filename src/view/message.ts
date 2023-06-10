@@ -25,7 +25,6 @@ function getMessage({status = 'loading', chosenFilter}: Option) {
   return 'Something wrong...';
 }
 
-/** View to show message when data are loading or now events exists */
 export default class MessageView extends AbstractView{
   #message;
 

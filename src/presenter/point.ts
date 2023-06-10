@@ -2,7 +2,6 @@ import {render, replace} from '../framework/render.js';
 
 import FormView from '../view/trip-form';
 import PointView from '../view/trip-point';
-// import ItemView from '../view/trip-item.js';
 import {DestinationsModel, OffersModel, PointsModel} from '../model';
 import { Point } from '../types/types.js';
 
