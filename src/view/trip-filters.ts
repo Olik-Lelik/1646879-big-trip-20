@@ -1,7 +1,11 @@
-import AbstractView from '../framework/view/abstract-view.js';
+import AbstractView from '../framework/view/abstract-view';
 
-function createFilterItem(filterPoint) {
-  const{type, count} = filterPoint;
+interface FilterItem {
+    type: string;
+    count: number;
+}
+
+function createFilterItem({type, count}: FilterItem) {
 
   return `  <div class="trip-filters__filter">
   <input id="filter-${type}" class="trip-filters__filter-input  visually-hidden" type="radio" name="trip-filter" value="${type}" ${count ? '' : 'disabled'} ${type === 'everything' && count ? 'checked' : ''}>
@@ -10,7 +14,7 @@ function createFilterItem(filterPoint) {
 `;
 }
 
-function createTemplate(filterPoints) {
+function createTemplate(filterPoints: FilterItem[]) {
   return `<form class="trip-filters" action="#" method="get">
   ${filterPoints.map(createFilterItem).join('')}
   <button class="visually-hidden" type="submit">Accept filter</button>
@@ -20,7 +24,7 @@ function createTemplate(filterPoints) {
 export default class FiltersView extends AbstractView {
   #filterPoints;
 
-  constructor(filterPoints) {
+  constructor(filterPoints: FilterItem[]) {
     super();
     this.#filterPoints = filterPoints;
   }

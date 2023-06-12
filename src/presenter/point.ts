@@ -14,8 +14,8 @@ interface Model {
 
 export default class PointPresenter {
   #container;
-  #destinations;
-  #offers;
+  #destinations: DestinationsModel;
+  #offers: OffersModel;
   #points: Point[];
 
   constructor({container, destinationsModel, offersModel, pointsModel}: Model) {
@@ -38,7 +38,8 @@ export default class PointPresenter {
     const itemEditView = new FormView({
       point,
       pointDestinations: this.#destinations.get,
-      pointOffers: this.#offers.get,
+      getOffers: ({type}: Point) => this.#offers.getByType(type),
+      getDestination: ({destination}: Point) => this.#destinations.getById(destination),
       onRollupClick: buttonRollupHandler,
       onFormSubmit: formSubmitHandler
     })

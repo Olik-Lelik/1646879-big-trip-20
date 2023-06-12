@@ -7,22 +7,19 @@ const FilterType = {
   EVERYTHING: 'Click New Event to create your first point',
 } as const;
 
-interface Option {
-  status: 'loading' | 'empty',
+type Option = {
+  status: 'loading'
+} | {
+  status: 'empty',
   chosenFilter: keyof typeof FilterType
-}
+};
 
-
-function getMessage({status = 'loading', chosenFilter}: Option) {
-  if (status === 'loading') {
+function getMessage(options: Option) {
+  if (options.status === 'loading') {
     return 'Loading...';
   }
 
-  if (chosenFilter) {
-    return FilterType[chosenFilter];
-  }
-
-  return 'Something wrong...';
+  return FilterType[options.chosenFilter];
 }
 
 export default class MessageView extends AbstractView{

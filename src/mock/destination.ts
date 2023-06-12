@@ -7,7 +7,7 @@ const getCity = (): City => getRandomArrayElement(CITIES);
 const mockPhoto = (city: City): Picture => ({
   src: `https://loremflickr.com/248/152?random=${getRandom(1, 10)}`,
   description: `${city} description.`
-})
+});
 
 export const createDestination = (): Destination => {
   const name = getCity();

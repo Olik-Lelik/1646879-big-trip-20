@@ -1,6 +1,4 @@
-import dayjs from "dayjs";
-import { TYPES, CITIES, FilterType } from "../const";
-import { filter } from "../utils";
+import { TYPES, CITIES, FilterType } from '../const';
 
 type OfferType = typeof TYPES[number];
 type City = typeof CITIES[number];
@@ -40,7 +38,7 @@ interface Point {
 }
 
 interface Filter {
-  type: keyof typeof filter,
+  type: FilterType,
   count: number
 }
 

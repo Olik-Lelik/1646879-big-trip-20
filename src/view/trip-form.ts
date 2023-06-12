@@ -3,14 +3,11 @@ import { TYPES } from '../const';
 import AbstractView from '../framework/view/abstract-view';
 import { Destination, Offer, OfferItem, Picture, Point } from '../types/types';
 
-function getOffersByType(offers: Offer[], type: Point['type']) {
-  return offers
-    .find((offer) => offer.type === type).offers;
-}
-
-function getOfferById(destinations: Destination[], id: Point['destination']) {
-  return destinations
-    .find((destination) => destination.id === id);
+interface GeneralProps {
+  point: Point;
+  pointDestinations: Destination[];
+  getOffers(point: Point): OfferItem[];
+  getDestination(point: Point): Destination
 }
 
 function createDestinationOption(name: Destination){
@@ -67,11 +64,11 @@ function createEventDestinationSection(destination: Destination) {
   </section>` : '');
 }
 
-function createTemplate({point, pointDestinations, pointOffers}: GeneralProps) {
+function createTemplate({point, pointDestinations, getOffers, getDestination}: GeneralProps) {
   const {price, dateFrom, dateTo} = point;
 
-  const destination = getOfferById(pointDestinations, point.destination);
-  const offers = getOffersByType(pointOffers, point.type);
+  const destination = getDestination(point);
+  const offers = getOffers(point);
 
   return /*html*/`<li class="trip-events__item">
   <form class="event event--edit" action="#" method="post">
@@ -131,12 +128,6 @@ function createTemplate({point, pointDestinations, pointOffers}: GeneralProps) {
   </li>`;
 }
 
-interface GeneralProps {
-  point: Point;
-  pointDestinations: Destination[];
-  pointOffers: Offer[];
-}
-
 type FormViewProps = GeneralProps & {
   onRollupClick(): void;
   onFormSubmit(): void;
@@ -145,17 +136,19 @@ type FormViewProps = GeneralProps & {
 export default class FormView extends AbstractView {
   #point: Point;
   #pointDestinations: Destination[];
-  #pointOffers: Offer[];
   #onRollupClick: () => void;
   #onFormSubmit: () => void;
+  #getOffers: (type: Point) => OfferItem[];
+  #getDestination: (id: Point) => Destination;
 
-  constructor({point, pointDestinations, pointOffers, onRollupClick, onFormSubmit}: FormViewProps) {
+  constructor({point, pointDestinations, onRollupClick, onFormSubmit, getOffers, getDestination}: FormViewProps) {
     super();
     this.#point = point;
     this.#pointDestinations = pointDestinations;
-    this.#pointOffers = pointOffers;
     this.#onRollupClick = onRollupClick;
     this.#onFormSubmit = onFormSubmit;
+    this.#getOffers = getOffers;
+    this.#getDestination = getDestination;
 
     this.element.querySelector('form')
       .addEventListener('submit', this.#formSubmitHandler);
@@ -168,7 +161,8 @@ export default class FormView extends AbstractView {
     return createTemplate({
       point: this.#point,
       pointDestinations: this.#pointDestinations,
-      pointOffers: this.#pointOffers
+      getOffers: this.#getOffers,
+      getDestination: this.#getDestination
     });
   }
 

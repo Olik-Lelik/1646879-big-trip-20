@@ -1,3 +1,6 @@
+import { Point } from './types/types';
+import { isPointFuture, isPointPast, isPointPresent } from './utils';
+
 const VALUE = 4;
 
 const TYPES = [
@@ -23,7 +26,7 @@ const CITIES = [
   'Santiago',
   'Havana',
   'Rome'
-]  as const;
+] as const;
 
 const DESCRIPTION = 'Phasellus eros mauris, condimentum sed nibh vitae, sodales efficitur ipsum. Sed blandit, eros vel aliquam faucibus, purus ex euismod diam, eu luctus nunc ante ut dui. Sed sed nisi sed augue convallis suscipit in sed felis. Aliquam erat volutpat. Nunc fermentum tortor ac porta dapibus. In rutrum ac purus sit amet tempus.';
 
@@ -36,11 +39,15 @@ const FORMAT_DURATION = {
   'DDHHmm': 'DD[D] HH[H] mm[M]'
 } as const;
 
-const FilterType = {
-  EVERYTHING: 'everything',
-  FUTURE: 'future',
-  PRESENT: 'present',
-  PAST: 'past'
-} as const;
+type FilterType = 'everything' | 'future' | 'present' | 'past';
+type PointFilter = (points: Point[]) => Point[];
 
-export {VALUE, TYPES, CITIES, DESCRIPTION, MSEC_IN_DAY, MSEC_IN_HOUR, FORMAT_DURATION, FilterType};
+const FILTER: Record<FilterType, PointFilter> = {
+  'everything': (points: Point[]) => [...points],
+  'future': (points: Point[]) => [...points].filter(isPointFuture),
+  'present': (points: Point[]) => [...points].filter(isPointPresent),
+  'past': (points: Point[]) => [...points].filter(isPointPast),
+};
+
+
+export {VALUE, TYPES, CITIES, DESCRIPTION, MSEC_IN_DAY, MSEC_IN_HOUR, FORMAT_DURATION, FilterType, FILTER};

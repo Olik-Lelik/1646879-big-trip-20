@@ -1,6 +1,6 @@
 import dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';
-import { FORMAT_DURATION, MSEC_IN_DAY, MSEC_IN_HOUR, FilterType } from './const';
+import { FORMAT_DURATION, MSEC_IN_DAY, MSEC_IN_HOUR } from './const';
 import { Point } from './types/types';
 dayjs.extend(duration);
 
@@ -27,19 +27,19 @@ function getRandom(min: number, max: number): number {
   return Math.floor(random);
 }
 
-const getRandomArrayElement = <Element extends any>(elements: Element[] | readonly Element[]) => elements[getRandom(0, elements.length - 1)];
+const getRandomArrayElement = <Element>(elements: Element[] | readonly Element[]) => elements[getRandom(0, elements.length - 1)];
 
 const getBoolean = () => Boolean(getRandom(0, 1));
 
 const getDateFrom = () => dayjs()
   .subtract(getRandom(0, Duration.Day), 'd')
   .subtract(getRandom(0, Duration.Hour), 'h')
-  .subtract(getRandom(0, Duration.Min), 'm').toDate()
+  .subtract(getRandom(0, Duration.Min), 'm').toDate();
 
 const getDateTo = (date: Date) => dayjs(date)
   .add(getRandom(0, Duration.Day), 'd')
   .add(getRandom(0, Duration.Hour), 'h')
-  .add(getRandom(0, Duration.Min), 'm').toDate()
+  .add(getRandom(0, Duration.Min), 'm').toDate();
 
 function getDateDuration(dateTo: Date, dateFrom: Date) {
   const timeDiff = dayjs(dateTo).diff(dayjs(dateFrom));
@@ -47,50 +47,44 @@ function getDateDuration(dateTo: Date, dateFrom: Date) {
   let pointDuration = '0';
 
   if (timeDiff >= MSEC_IN_DAY) {
-    pointDuration = dayjs.duration(timeDiff).format(FORMAT_DURATION['DDHHmm'])
+    pointDuration = dayjs.duration(timeDiff).format(FORMAT_DURATION['DDHHmm']);
   } else if (timeDiff >= MSEC_IN_HOUR) {
-    pointDuration = dayjs.duration(timeDiff).format(FORMAT_DURATION['HHmm'])
+    pointDuration = dayjs.duration(timeDiff).format(FORMAT_DURATION['HHmm']);
   } else if (timeDiff < MSEC_IN_HOUR) {
-    pointDuration = dayjs.duration(timeDiff).format(FORMAT_DURATION['mm'])
+    pointDuration = dayjs.duration(timeDiff).format(FORMAT_DURATION['mm']);
   }
 
   return pointDuration;
 }
 
 function formatStringToDateTime(date: Date) {
-  return dayjs(date).format('YYYY-MM-DDTHH:mm')
+  return dayjs(date).format('YYYY-MM-DDTHH:mm');
 }
 
 function formatStringToShortDateTime(date: Date) {
-  return dayjs(date).format('YYYY-MM-DD')
+  return dayjs(date).format('YYYY-MM-DD');
 }
 
 function formatStringToHumanizeDateTime(date: Date) {
-  return dayjs(date).format('MMM DD')
+  return dayjs(date).format('MMM DD');
 }
 
 function formatStringToTime(date: Date) {
-  return dayjs(date).format('HH:mm')
+  return dayjs(date).format('HH:mm');
 }
 
 function isPointFuture(point: Point) {
-  return dayjs().isBefore(point.dateFrom)
+  return dayjs().isBefore(point.dateFrom);
 }
 
 function isPointPast(point: Point) {
-  return dayjs().isAfter(point.dateTo)
+  return dayjs().isAfter(point.dateTo);
 }
 
 function isPointPresent(point: Point) {
-  return (dayjs().isAfter(point.dateFrom) && dayjs().isBefore(point.dateTo))
+  return (dayjs().isAfter(point.dateFrom) && dayjs().isBefore(point.dateTo));
 }
 
-const filter = {
-  [FilterType.EVERYTHING]: (points: Point[]) => [...points],
-  [FilterType.FUTURE]: (points: Point[]) => points.filter((point) => isPointFuture(point)),
-  [FilterType.PRESENT]: (points: Point[]) => points.filter((point) => isPointPresent(point)),
-  [FilterType.PAST]: (points: Point[]) => points.filter((point) => isPointPast(point)),
-}
 
 export {
   getRandom,
@@ -103,5 +97,7 @@ export {
   formatStringToShortDateTime,
   formatStringToHumanizeDateTime,
   formatStringToTime,
-  filter,
+  isPointFuture,
+  isPointPresent,
+  isPointPast
 };

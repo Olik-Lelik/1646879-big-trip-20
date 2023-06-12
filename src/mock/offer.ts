@@ -2,12 +2,12 @@ import { getRandom } from '../utils';
 import { VALUE } from '../const';
 import { OfferType, OfferItem } from '../types/types';
 
-const enum Price {
-  Min = 50,
-  Max = 80
-}
+const Price = {
+  Min: 50,
+  Max: 80
+} as const;
 
-const mockOfferItem = (type: OfferType): OfferItem  => {
+const mockOfferItem = (type: OfferType): OfferItem => {
   const price = getRandom(Price.Min, Price.Max);
 
   return {

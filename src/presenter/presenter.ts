@@ -4,11 +4,11 @@ import SortView from '../view/trip-sort';
 import ListView from '../view/trip-list';
 import PointPresenter from './point';
 import {DestinationsModel, OffersModel, PointsModel} from '../model';
-import { generateFilter } from '../mock/filter.js';
+import { generateFilter } from '../mock/filter';
 
 interface Props {
   container: Element;
-};
+}
 
 interface Model {
   destinationsModel: DestinationsModel,
