@@ -2,6 +2,16 @@ import AbstractView from '../framework/view/abstract-view';
 import { Destination, OfferItem, Point } from '../types/types';
 import{ getDateDuration, formatStringToDateTime, formatStringToShortDateTime, formatStringToHumanizeDateTime, formatStringToTime } from '../utils';
 
+interface GeneralProps {
+  point: Point;
+  pointDestination: Destination;
+  pointOffers: OfferItem[];
+}
+
+type PointViewProps = GeneralProps & {
+  onEditClick(): void;
+}
+
 const createOfferItem = ({title, price}: OfferItem) => /*html*/`<li class="event__offer">
 <span class="event__offer-title">${title}</span>
 &plus;&euro;&nbsp;
@@ -47,16 +57,6 @@ function createTemplate({point, pointDestination, pointOffers}: GeneralProps) {
     </button>
   </div>
   </li>`;
-}
-
-interface GeneralProps {
-  point: Point;
-  pointDestination: Destination;
-  pointOffers: OfferItem[];
-}
-
-type PointViewProps = GeneralProps & {
-  onEditClick(): void;
 }
 
 export default class PointView extends AbstractView {

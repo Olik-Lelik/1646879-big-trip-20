@@ -1,33 +1,35 @@
-import AbstractView from '../framework/view/abstract-view.js';
+import AbstractView from '../framework/view/abstract-view';
 
-function createTemplate() {
+interface FilterItem {
+    type: string;
+    count: number;
+}
+
+function createFilterItem({type, count}: FilterItem) {
+
+  return `  <div class="trip-filters__filter">
+  <input id="filter-${type}" class="trip-filters__filter-input  visually-hidden" type="radio" name="trip-filter" value="${type}" ${count ? '' : 'disabled'} ${type === 'everything' && count ? 'checked' : ''}>
+  <label class="trip-filters__filter-label" for="filter-${type}">${type}</label>
+</div>
+`;
+}
+
+function createTemplate(filterPoints: FilterItem[]) {
   return `<form class="trip-filters" action="#" method="get">
-  <div class="trip-filters__filter">
-    <input id="filter-everything" class="trip-filters__filter-input  visually-hidden" type="radio" name="trip-filter" value="everything" checked>
-    <label class="trip-filters__filter-label" for="filter-everything">Everything</label>
-  </div>
-
-  <div class="trip-filters__filter">
-    <input id="filter-future" class="trip-filters__filter-input  visually-hidden" type="radio" name="trip-filter" value="future" disabled>
-    <label class="trip-filters__filter-label" for="filter-future">Future</label>
-  </div>
-
-  <div class="trip-filters__filter">
-    <input id="filter-present" class="trip-filters__filter-input  visually-hidden" type="radio" name="trip-filter" value="present">
-    <label class="trip-filters__filter-label" for="filter-present">Present</label>
-  </div>
-
-  <div class="trip-filters__filter">
-    <input id="filter-past" class="trip-filters__filter-input  visually-hidden" type="radio" name="trip-filter" value="past" disabled>
-    <label class="trip-filters__filter-label" for="filter-past">Past</label>
-  </div>
-
+  ${filterPoints.map(createFilterItem).join('')}
   <button class="visually-hidden" type="submit">Accept filter</button>
 </form>`;
 }
 
 export default class FiltersView extends AbstractView {
+  #filterPoints;
+
+  constructor(filterPoints: FilterItem[]) {
+    super();
+    this.#filterPoints = filterPoints;
+  }
+
   get template() {
-    return createTemplate();
+    return createTemplate(this.#filterPoints);
   }
 }
