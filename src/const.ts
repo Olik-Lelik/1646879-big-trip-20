@@ -1,5 +1,5 @@
 import { Point } from './types/types';
-import { isPointFuture, isPointPast, isPointPresent } from './utils';
+import { getDayDifference, getPriceDifference, getTimeDifference, isPointFuture, isPointPast, isPointPresent } from './utils';
 
 const VALUE = 4;
 
@@ -43,11 +43,26 @@ type FilterType = 'everything' | 'future' | 'present' | 'past';
 type PointFilter = (points: Point[]) => Point[];
 
 const FILTER: Record<FilterType, PointFilter> = {
-  'everything': (points: Point[]) => [...points],
-  'future': (points: Point[]) => [...points].filter(isPointFuture),
-  'present': (points: Point[]) => [...points].filter(isPointPresent),
-  'past': (points: Point[]) => [...points].filter(isPointPast),
+  'everything': (points: Point[]) => points,
+  'future': (points: Point[]) => points.filter(isPointFuture),
+  'present': (points: Point[]) => points.filter(isPointPresent),
+  'past': (points: Point[]) => points.filter(isPointPast),
+};
+
+type SortType = 'day' | 'event' | 'time' | 'price' | 'offer';
+type PointSort = (points: Point[]) => Point[];
+
+const sort: Record<SortType, PointSort> = {
+  'day': (points: Point[]) => [...points].sort(getDayDifference),
+  'time': (points: Point[]) => [...points].sort(getTimeDifference),
+  'price': (points: Point[]) => [...points].sort(getPriceDifference),
+  'event': () => {
+    throw new Error('sorting not available');
+  },
+  'offer': () => {
+    throw new Error('sorting not available');
+  },
 };
 
 
-export {VALUE, TYPES, CITIES, DESCRIPTION, MSEC_IN_DAY, MSEC_IN_HOUR, FORMAT_DURATION, FilterType, FILTER};
+export {VALUE, TYPES, CITIES, DESCRIPTION, MSEC_IN_DAY, MSEC_IN_HOUR, FORMAT_DURATION, FilterType, FILTER, SortType, sort};

@@ -1,32 +1,24 @@
 import AbstractView from './view/abstract-view.js';
 
-/** @enum {string} Перечисление возможных позиций для отрисовки */
-const RenderPosition = {
-  BEFOREBEGIN: 'beforebegin',
-  AFTERBEGIN: 'afterbegin',
-  BEFOREEND: 'beforeend',
-  AFTEREND: 'afterend',
-};
-
 /**
  * Функция для создания элемента на основе разметки
- * @param {string} template Разметка в виде строки
- * @returns {HTMLElement} Созданный элемент
+ * @param template Разметка в виде строки
+ * @returns Созданный элемент
  */
-function createElement(template) {
+function createElement(template: string): HTMLElement {
   const newElement = document.createElement('div');
   newElement.innerHTML = template;
 
-  return newElement.firstElementChild;
+  return newElement.firstElementChild as HTMLElement;
 }
 
 /**
  * Функция для отрисовки элемента
- * @param {HTMLElement} container Элемент в котором будет отрисован компонент
- * @param {AbstractView} component Компонент, который должен был отрисован
- * @param {string} place Позиция компонента относительно контейнера. По умолчанию - `beforeend`
+ * @param container Элемент в котором будет отрисован компонент
+ * @param component Компонент, который должен был отрисован
+ * @param place Позиция компонента относительно контейнера. По умолчанию - `beforeend`
  */
-function render(container, component, place = RenderPosition.BEFOREEND) {
+function render(container: HTMLElement, component: AbstractView, place: InsertPosition = 'beforeend') {
   if (!(component instanceof AbstractView)) {
     throw new Error('Can render only components');
   }
@@ -40,10 +32,10 @@ function render(container, component, place = RenderPosition.BEFOREEND) {
 
 /**
  * Функция для замены одного компонента на другой
- * @param {AbstractView} newComponent Компонент, который нужно показать
- * @param {AbstractView} oldComponent Компонент, который нужно скрыть
+ * @param newComponent Компонент, который нужно показать
+ * @param oldComponent Компонент, который нужно скрыть
  */
-function replace(newComponent, oldComponent) {
+function replace(newComponent: AbstractView, oldComponent: AbstractView) {
   if (!(newComponent instanceof AbstractView && oldComponent instanceof AbstractView)) {
     throw new Error('Can replace only components');
   }
@@ -62,9 +54,9 @@ function replace(newComponent, oldComponent) {
 
 /**
  * Функция для удаления компонента
- * @param {AbstractView} component Компонент, который нужно удалить
+ * @param component Компонент, который нужно удалить
  */
-function remove(component) {
+function remove(component: AbstractView) {
   if (component === null) {
     return;
   }
@@ -77,4 +69,4 @@ function remove(component) {
   component.removeElement();
 }
 
-export {RenderPosition, createElement, render, replace, remove};
+export { createElement, render, replace, remove };

@@ -6,9 +6,10 @@ interface FilterItem {
 }
 
 function createFilterItem({type, count}: FilterItem) {
+  const checked = type === 'everything' ? 'checked' : '';
 
   return `  <div class="trip-filters__filter">
-  <input id="filter-${type}" class="trip-filters__filter-input  visually-hidden" type="radio" name="trip-filter" value="${type}" ${count ? '' : 'disabled'} ${type === 'everything' && count ? 'checked' : ''}>
+  <input id="filter-${type}" class="trip-filters__filter-input  visually-hidden" type="radio" name="trip-filter" value="${type}" ${count ? '' : 'disabled'} ${checked}>
   <label class="trip-filters__filter-label" for="filter-${type}">${type}</label>
 </div>
 `;
