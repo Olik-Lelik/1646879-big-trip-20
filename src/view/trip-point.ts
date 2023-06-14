@@ -2,24 +2,24 @@ import AbstractView from '../framework/view/abstract-view';
 import { Destination, OfferItem, Point } from '../types/types';
 import{ getDateDuration, formatStringToDateTime, formatStringToShortDateTime, formatStringToHumanizeDateTime, formatStringToTime } from '../utils';
 
-interface GeneralProps {
-  point: Point;
-  pointDestination: Destination;
-  pointOffers: OfferItem[];
-}
-
-type PointViewProps = GeneralProps & {
-  onEditClick(): void;
-}
-
 const createOfferItem = ({title, price}: OfferItem) => /*html*/`<li class="event__offer">
 <span class="event__offer-title">${title}</span>
 &plus;&euro;&nbsp;
 <span class="event__offer-price">${price}</span>
 </li>`;
 
+interface GeneralProps {
+  point: Point;
+  currentDestination: Destination;
+  currentOffers: OfferItem[];
+}
 
-function createTemplate({point, pointDestination, pointOffers}: GeneralProps) {
+type PointViewProps = GeneralProps & {
+  onEditClick(): void;
+  onFavoriteClick(): void;
+}
+
+function createTemplate({point, currentDestination, currentOffers}: GeneralProps) {
   const {price, dateFrom, dateTo, favorite, type} = point;
 
   const hasFavorite = favorite ? '--active' : '';
@@ -30,7 +30,7 @@ function createTemplate({point, pointDestination, pointOffers}: GeneralProps) {
     <div class="event__type">
       <img class="event__type-icon" width="42" height="42" src="img/icons/${type}.png" alt="Event type icon">
     </div>
-    <h3 class="event__title">${type} ${pointDestination.name}</h3>
+    <h3 class="event__title">${type} ${currentDestination.name}</h3>
     <div class="event__schedule">
       <p class="event__time">
         <time class="event__start-time" datetime="${formatStringToDateTime(dateFrom)}">${formatStringToTime(dateFrom)}</time>
@@ -44,7 +44,7 @@ function createTemplate({point, pointDestination, pointOffers}: GeneralProps) {
     </p>
     <h4 class="visually-hidden">Offers:</h4>
     <ul class="event__selected-offers">
-      ${pointOffers.map(createOfferItem).join('')}
+      ${currentOffers.map(createOfferItem).join('')}
     </ul>
     <button class="event__favorite-btn event__favorite-btn${hasFavorite}" type="button">
       <span class="visually-hidden">Add to favorite</span>
@@ -61,31 +61,41 @@ function createTemplate({point, pointDestination, pointOffers}: GeneralProps) {
 
 export default class PointView extends AbstractView {
   #point: Point;
-  #pointDestination: Destination;
-  #pointOffers: OfferItem[] = null;
+  #currentDestination: Destination;
+  #currentOffers: OfferItem[] = null;
   #onEditClick: () => void;
+  #onFavoriteClick: () => void;
 
-  constructor({point, pointDestination, pointOffers, onEditClick}: PointViewProps) {
+  constructor({point, currentDestination, currentOffers, onEditClick, onFavoriteClick}: PointViewProps) {
     super();
     this.#point = point;
-    this.#pointDestination = pointDestination;
-    this.#pointOffers = pointOffers;
+    this.#currentDestination = currentDestination;
+    this.#currentOffers = currentOffers;
     this.#onEditClick = onEditClick;
+    this.#onFavoriteClick = onFavoriteClick;
+
     this.element.querySelector<HTMLButtonElement>('.event__rollup-btn')
       .addEventListener('click', this.#editClickHandler);
+    this.element.querySelector<HTMLButtonElement>('.event__favorite-btn')
+      .addEventListener('click', this.#favoriteClickHandler);
   }
 
   get template() {
     return createTemplate({
       point: this.#point,
-      pointDestination: this.#pointDestination,
-      pointOffers: this.#pointOffers
+      currentDestination: this.#currentDestination,
+      currentOffers: this.#currentOffers
     });
   }
 
   #editClickHandler = (evt: Event) => {
     evt.preventDefault();
     this.#onEditClick();
+  };
+
+  #favoriteClickHandler = (evt: Event) => {
+    evt.preventDefault();
+    this.#onFavoriteClick();
   };
 }
 

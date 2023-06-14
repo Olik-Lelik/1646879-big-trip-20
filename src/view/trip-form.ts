@@ -3,14 +3,7 @@ import { TYPES } from '../const';
 import AbstractView from '../framework/view/abstract-view';
 import { Destination, Offer, OfferItem, Picture, Point } from '../types/types';
 
-interface GeneralProps {
-  point: Point;
-  pointDestinations: Destination[];
-  getOffers(point: Point): OfferItem[];
-  getDestination(point: Point): Destination
-}
-
-function createDestinationOption(name: Destination){
+function createDestinationOption({name}: Destination){
 /*html*/return `<option value="${name}"></option>`;
 }
 
@@ -21,7 +14,7 @@ function createEventTypeItem(type: Offer['type'], point: Point) {
 </div>`;
 }
 
-function createEventOffersSection(offers: Offer['offers'], point: Point) {
+function createEventOffersSection(offers: OfferItem[], point: Point) {
   return(
     (offers.length > 0) ? `<section class="event__section  event__section--offers">
   <h3 class="event__section-title  event__section-title--offers">Offers</h3>
@@ -64,11 +57,17 @@ function createEventDestinationSection(destination: Destination) {
   </section>` : '');
 }
 
-function createTemplate({point, pointDestinations, getOffers, getDestination}: GeneralProps) {
+interface GeneralProps {
+  point: Point;
+  destinations: Destination[];
+  currentOffers: OfferItem[];
+  getCurrentDestination(point: Point): Destination
+}
+
+function createTemplate({point, destinations, currentOffers, getCurrentDestination}: GeneralProps) {
   const {price, dateFrom, dateTo} = point;
 
-  const destination = getDestination(point);
-  const offers = getOffers(point);
+  const destination = getCurrentDestination(point);
 
   return /*html*/`<li class="trip-events__item">
   <form class="event event--edit" action="#" method="post">
@@ -94,7 +93,7 @@ function createTemplate({point, pointDestinations, getOffers, getDestination}: G
     </label>
     <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${destination.name}" list="destination-list-1">
     <datalist id="destination-list-1">
-      ${pointDestinations.map(createDestinationOption).join('')}
+      ${destinations.map(createDestinationOption).join('')}
     </datalist>
   </div>
 
@@ -121,7 +120,7 @@ function createTemplate({point, pointDestinations, getOffers, getDestination}: G
   </button>
   </header>
   <section class="event__details">
-  ${createEventOffersSection(offers, point)}
+  ${createEventOffersSection(currentOffers, point)}
   ${createEventDestinationSection(destination)}
   </section>
   </form>
@@ -130,25 +129,25 @@ function createTemplate({point, pointDestinations, getOffers, getDestination}: G
 
 type FormViewProps = GeneralProps & {
   onRollupClick(): void;
-  onFormSubmit(): void;
+  onFormSubmit(point: Point): void;
 }
 
 export default class FormView extends AbstractView {
   #point: Point;
-  #pointDestinations: Destination[];
+  #destinations: Destination[];
+  #currentOffers: OfferItem[] = null;
+  #getCurrentDestination: (id: Point) => Destination;
   #onRollupClick: () => void;
-  #onFormSubmit: () => void;
-  #getOffers: (type: Point) => OfferItem[];
-  #getDestination: (id: Point) => Destination;
+  #onFormSubmit: (point: Point) => void;
 
-  constructor({point, pointDestinations, onRollupClick, onFormSubmit, getOffers, getDestination}: FormViewProps) {
+  constructor({point, destinations, onRollupClick, onFormSubmit, currentOffers, getCurrentDestination}: FormViewProps) {
     super();
     this.#point = point;
-    this.#pointDestinations = pointDestinations;
+    this.#destinations = destinations;
+    this.#currentOffers = currentOffers;
+    this.#getCurrentDestination = getCurrentDestination;
     this.#onRollupClick = onRollupClick;
     this.#onFormSubmit = onFormSubmit;
-    this.#getOffers = getOffers;
-    this.#getDestination = getDestination;
 
     this.element.querySelector('form')
       .addEventListener('submit', this.#formSubmitHandler);
@@ -160,15 +159,15 @@ export default class FormView extends AbstractView {
   get template() {
     return createTemplate({
       point: this.#point,
-      pointDestinations: this.#pointDestinations,
-      getOffers: this.#getOffers,
-      getDestination: this.#getDestination
+      destinations: this.#destinations,
+      currentOffers: this.#currentOffers,
+      getCurrentDestination: this.#getCurrentDestination
     });
   }
 
   #formSubmitHandler = (evt: SubmitEvent) => {
     evt.preventDefault();
-    this.#onFormSubmit();
+    this.#onFormSubmit(this.#point);
   };
 
   #buttonRollupHandler = (evt: Event) => {

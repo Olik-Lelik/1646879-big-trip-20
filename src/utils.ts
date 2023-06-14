@@ -85,6 +85,24 @@ function isPointPresent(point: Point) {
   return (dayjs().isAfter(point.dateFrom) && dayjs().isBefore(point.dateTo));
 }
 
+function updatePoint(points: Point[], update: Point) {
+  return points.map((point) => point.id === update.id ? update : point);
+}
+
+function getDayDifference(pointA: Point, pointB: Point) {
+  return dayjs(pointA.dateFrom).diff(dayjs(pointB.dateFrom));
+}
+
+function getTimeDifference(pointA: Point, pointB: Point) {
+  const timeDiffA = dayjs(pointA.dateTo).diff(dayjs(pointA.dateFrom));
+  const timeDiffB = dayjs(pointB.dateTo).diff(dayjs(pointB.dateFrom));
+
+  return timeDiffB - timeDiffA;
+}
+
+function getPriceDifference(pointA: Point, pointB: Point) {
+  return pointB.price - pointA.price;
+}
 
 export {
   getRandom,
@@ -99,5 +117,9 @@ export {
   formatStringToTime,
   isPointFuture,
   isPointPresent,
-  isPointPast
+  isPointPast,
+  updatePoint,
+  getDayDifference,
+  getTimeDifference,
+  getPriceDifference
 };

@@ -1,28 +1,28 @@
+import { SortType } from '../const';
 import AbstractView from '../framework/view/abstract-view';
 
-type SortId = 'day' | 'event' | 'time' | 'price' | 'offer';
-
 interface SortItemProps {
-  id: SortId;
+  type: SortType;
   isChecked?: boolean;
-  disabled?: boolean;
+  isdisabled?: boolean;
 }
 
 const SORT_ITEMS: SortItemProps[] = [
-  {id: 'day', isChecked: true},
-  {id: 'event', disabled: true},
-  {id: 'time'},
-  {id: 'price'},
-  {id: 'offer', disabled: true},
+  {type: 'day', isChecked: true},
+  {type: 'event', isdisabled: true},
+  {type: 'time'},
+  {type: 'price'},
+  {type: 'offer', isdisabled: true},
 ];
 
-
-function createSortRadio({id, isChecked = false}: SortItemProps){
-  const htmlId = `sort-${id}`;
+function createSortRadio({type, isChecked, isdisabled}: SortItemProps){
+  const htmlId = `sort-${type}`;
   const checked = isChecked ? 'checked' : '';
-  return `<div class="trip-sort__item  trip-sort__item--${id}">
-  <input id="${htmlId}" class="trip-sort__input  visually-hidden" type="radio" name="trip-sort" value="${id}" ${checked}>
-  <label class="trip-sort__btn" for="${htmlId}">${id}</label>
+  const disabled = isdisabled ? 'disabled' : '';
+
+  return `<div class="trip-sort__item  trip-sort__item--${type}">
+  <input data-sort-type="${type}" id="${htmlId}" class="trip-sort__input  visually-hidden" type="radio" name="trip-sort" value="${type}" ${disabled} ${checked}>
+  <label class="trip-sort__btn" for="${htmlId}">${type}</label>
 </div>`;
 }
 
@@ -33,7 +33,26 @@ function createTemplate() {
 </form>`;
 }
 
+
+type Sort = {
+  onSortTypeChange(sortType: SortType): void,
+}
 export default class SortView extends AbstractView {
+  #element: HTMLFormElement | null;
+  #onSortTypeChange: (sortType: SortType) => void;
+
+  constructor({onSortTypeChange}: Sort) {
+    super();
+    this.#onSortTypeChange = onSortTypeChange;
+
+    this.element.addEventListener('change', this.#sortTypeChangeHandler);
+  }
+
+  #sortTypeChangeHandler = (evt: Event) => {
+    const input = evt.target as HTMLInputElement;
+    this.#onSortTypeChange(input.value as SortType);
+  };
+
   get template() {
     return createTemplate();
   }

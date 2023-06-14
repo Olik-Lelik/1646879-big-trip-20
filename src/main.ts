@@ -2,7 +2,7 @@ import TripInfo from './view/trip-info';
 import Presenter from './presenter/presenter';
 import MockService from './service/mock-service';
 import {DestinationsModel, OffersModel, PointsModel} from './model';
-import { RenderPosition, render } from './framework/render.js';
+import { render } from './framework/render';
 
 const siteHeaderElement = document.querySelector<HTMLElement>('.trip-main');
 const siteMainElement = document.querySelector<HTMLElement>('.trip-events');
@@ -14,6 +14,9 @@ const pointsModel = new PointsModel(mock);
 
 const presenter = new Presenter({
   container: siteMainElement,
+  destinationsModel,
+  offersModel,
+  pointsModel
 });
 
 render(siteHeaderElement, new TripInfo({
@@ -21,10 +24,6 @@ render(siteHeaderElement, new TripInfo({
   dateFrom: new Date(2023, 4, 12),
   dateTo: new Date(2023, 4, 22),
   price: 1000,
-}), RenderPosition.AFTERBEGIN);
+}), 'afterbegin');
 
-presenter.init({
-  destinationsModel,
-  offersModel,
-  pointsModel
-});
+presenter.init();
