@@ -53,10 +53,11 @@ export default class PointPresenter {
     this.#itemEditView = new FormView({
       point,
       destinations: this.#destinations.get,
-      currentOffers: this.#offers.getByType(point.type),
-      getCurrentDestination: ({destination}: Point) => this.#destinations.getById(destination),
+      destination: this.#destinations.getById(point.destination),
+      getDestinationByCity: this.#destinations.getByCity.bind(this.#destinations),
       onRollupClick: this.#replaceEditToPoint,
-      onFormSubmit: this.#formSubmitHandler
+      onFormSubmit: this.#formSubmitHandler,
+      getOffersByType: this.#offers.getByType.bind(this.#offers),
     });
 
     if(prevItemView === null || prevEditView === null) {

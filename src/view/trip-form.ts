@@ -1,7 +1,7 @@
 import dayjs from 'dayjs';
 import { TYPES } from '../const';
-import AbstractView from '../framework/view/abstract-view';
 import { Destination, Offer, OfferItem, Picture, Point } from '../types/types';
+import AbstractStatefulView from '../framework/view/abstract-stateful-view';
 
 function createDestinationOption({name}: Destination){
 /*html*/return `<option value="${name}"></option>`;
@@ -15,21 +15,25 @@ function createEventTypeItem(type: Offer['type'], point: Point) {
 }
 
 function createEventOffersSection(offers: OfferItem[], point: Point) {
-  return(
-    (offers.length > 0) ? `<section class="event__section  event__section--offers">
+  if (offers.length === 0) {
+    return '';
+  }
+  const isChecked = (id: OfferItem['id']) => point.offers.includes(id) ? 'checked' : '';
+
+  return `<section class="event__section  event__section--offers">
   <h3 class="event__section-title  event__section-title--offers">Offers</h3>
 
   <div class="event__available-offers">
     ${offers.map(({id, title, price}: OfferItem) => /*html*/ `<div class="event__offer-selector">
-    <input class="event__offer-checkbox  visually-hidden" id="event-offer-${id}" type="checkbox" name="event-offer-${point.type}" checked>
+    <input class="event__offer-checkbox  visually-hidden" id="event-offer-${id}" type="checkbox" name="event-offer-${point.type}" ${isChecked(id)}>
     <label class="event__offer-label" for="event-offer-${id}">
       <span class="event__offer-title">${title}</span>
       &plus;&euro;&nbsp;
       <span class="event__offer-price">${price}</span>
     </label></div>`
-    ).join('')}
+  ).join('')}
   </div>
-</section>` : '');
+</section>`;
 }
 
 function createDestinationDescription(description: Destination['description'], name: Destination['name']) {
@@ -60,14 +64,15 @@ function createEventDestinationSection(destination: Destination) {
 interface GeneralProps {
   point: Point;
   destinations: Destination[];
-  currentOffers: OfferItem[];
-  getCurrentDestination(point: Point): Destination
+  destination: Destination;
+  getOffersByType(type: Offer['type']): OfferItem[];
+  getDestinationByCity(city: Destination['name']): Destination;
 }
 
-function createTemplate({point, destinations, currentOffers, getCurrentDestination}: GeneralProps) {
+function createTemplate({point, destinations, destination, getOffersByType}: GeneralProps) {
   const {price, dateFrom, dateTo} = point;
 
-  const destination = getCurrentDestination(point);
+  const currentOffers = getOffersByType(point.type);
 
   return /*html*/`<li class="trip-events__item">
   <form class="event event--edit" action="#" method="post">
@@ -128,50 +133,117 @@ function createTemplate({point, destinations, currentOffers, getCurrentDestinati
 }
 
 type FormViewProps = GeneralProps & {
+  point: Point;
   onRollupClick(): void;
   onFormSubmit(point: Point): void;
 }
 
-export default class FormView extends AbstractView {
-  #point: Point;
+interface State {
+  point: Point;
+  destination: Destination;
+}
+export default class FormView extends AbstractStatefulView {
   #destinations: Destination[];
-  #currentOffers: OfferItem[] = null;
-  #getCurrentDestination: (id: Point) => Destination;
   #onRollupClick: () => void;
   #onFormSubmit: (point: Point) => void;
+  #getOffersByType: (type: Offer['type']) => OfferItem[];
+  #getDestinationByCity: (city: string) => Destination;
 
-  constructor({point, destinations, onRollupClick, onFormSubmit, currentOffers, getCurrentDestination}: FormViewProps) {
+  declare _state: State;
+
+  // declare _setState(update: State): void;
+
+  constructor({point, destinations, destination, onRollupClick, onFormSubmit, getOffersByType, getDestinationByCity}: FormViewProps) {
     super();
-    this.#point = point;
+    this._setState({
+      point: {...point},
+      destination
+    });
     this.#destinations = destinations;
-    this.#currentOffers = currentOffers;
-    this.#getCurrentDestination = getCurrentDestination;
     this.#onRollupClick = onRollupClick;
     this.#onFormSubmit = onFormSubmit;
+    this.#getOffersByType = getOffersByType;
+    this.#getDestinationByCity = getDestinationByCity;
 
+    this._restoreHandlers();
+  }
+
+  _restoreHandlers = () => {
     this.element.querySelector('form')
       .addEventListener('submit', this.#formSubmitHandler);
 
     this.element.querySelector<HTMLButtonElement>('.event__rollup-btn')
       .addEventListener('click', this.#buttonRollupHandler);
-  }
+
+    this.element.querySelector<HTMLElement>('.event__type-group')
+      .addEventListener('change', this.#typePointClick);
+
+    this.element.querySelector<HTMLInputElement>('.event__input--destination')
+      .addEventListener('change', this.#cityChange);
+  };
 
   get template() {
+    const {point, destination} = this._state;
     return createTemplate({
-      point: this.#point,
+      point,
+      destination,
       destinations: this.#destinations,
-      currentOffers: this.#currentOffers,
-      getCurrentDestination: this.#getCurrentDestination
+      getOffersByType: this.#getOffersByType,
+      getDestinationByCity: this.#getDestinationByCity
     });
   }
 
   #formSubmitHandler = (evt: SubmitEvent) => {
     evt.preventDefault();
-    this.#onFormSubmit(this.#point);
+    this.#onFormSubmit(FormView.parseStateToPoint(this._state.point));
   };
 
   #buttonRollupHandler = (evt: Event) => {
     evt.preventDefault();
     this.#onRollupClick();
   };
+
+  #typePointClick = (evt: Event) => {
+    evt.preventDefault();
+    const input = evt.target as HTMLInputElement;
+
+    this.updateElement({
+      ...this._state,
+      type: input.value,
+      offers: []
+    });
+  };
+
+  #cityChange = (evt: Event) => {
+    const city = (evt.target as HTMLInputElement).value;
+
+    if (city === this._state.destination.name || city === '') {
+      return;
+    }
+
+    const destination = this.#getDestinationByCity(city);
+
+    if(destination) {
+      this.updateElement({
+        point: {
+          ...this._state.point,
+          destination: destination.id
+        },
+        destination
+      });
+    }
+  };
+
+  static parsePointToState(point: Point, destination: Destination) {
+    return {
+      point: {...point},
+      destination
+    };
+  }
+
+  static parseStateToPoint(state: Point) {
+    return {
+      ...state
+    };
+  }
 }

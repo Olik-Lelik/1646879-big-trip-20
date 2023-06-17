@@ -1,4 +1,4 @@
-import { getRandomArrayElement } from '../utils';
+import { getRandom, getRandomArrayElement } from '../utils';
 import { VALUE, TYPES } from '../const';
 import { createPoint } from '../mock/point';
 import { createDestination } from '../mock/destination';
@@ -43,8 +43,9 @@ export default class MockService {
 
       const {offers} = this.#offers.find((offer) => offer.type === type);
 
-      const offerIds = offers.length > 0 ? offers
+      const offerIds = offers.length ? offers.slice(0, getRandom(0, offers.length))
         .map(({id}) => id) : [];
+
 
       return createPoint(type, destination.id, offerIds);
     });
