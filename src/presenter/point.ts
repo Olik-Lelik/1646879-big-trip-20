@@ -3,7 +3,7 @@ import {remove, render, replace} from '../framework/render';
 import FormView from '../view/trip-form';
 import PointView from '../view/trip-point';
 import {DestinationsModel, OffersModel} from '../model';
-import { Point } from '../types/types.js';
+import { OfferType, Point } from '../types/types.js';
 
 interface Model {
   container: HTMLElement,
@@ -53,10 +53,12 @@ export default class PointPresenter {
     this.#itemEditView = new FormView({
       point,
       destinations: this.#destinations.get,
-      currentOffers: this.#offers.getByType(point.type),
-      getCurrentDestination: ({destination}: Point) => this.#destinations.getById(destination),
+      destination: this.#destinations.getById(point.destination),
+      getDestinationByCity: this.#destinations.getByCity.bind(this.#destinations),
+      getOffersByType: (type: OfferType) => this.#offers.getByType(type),
       onRollupClick: this.#replaceEditToPoint,
-      onFormSubmit: this.#formSubmitHandler
+      onFormSubmit: this.#formSubmitHandler,
+      // onFormReset: this.#replaceEditToPoint,
     });
 
     if(prevItemView === null || prevEditView === null) {
@@ -81,7 +83,9 @@ export default class PointPresenter {
   }
 
   resetView() {
+    const isCurrentDestination = this.#destinations.getById(this.#point.destination);
     if(this.#mode !== Mode.DEFAULT) {
+      this.#itemEditView.reset(this.#point, isCurrentDestination);
       this.#replaceEditToPoint();
     }
   }
@@ -100,8 +104,10 @@ export default class PointPresenter {
   };
 
   #escKeyDownHandler = (evt: KeyboardEvent) => {
+    const isCurrentDestination = this.#destinations.getById(this.#point.destination);
     if (evt.key === 'Escape' || evt.key === 'Esc') {
       evt.preventDefault();
+      this.#itemEditView.reset(this.#point, isCurrentDestination);
       this.#replaceEditToPoint();
       document.removeEventListener('keydown', this.#escKeyDownHandler);
     }

@@ -1,11 +1,11 @@
-import { FILTER } from '../const';
+import { filter } from '../const';
 import { Point } from '../types/types';
 
 
-export const generateFilter = (points: Point[]) => Object.entries(FILTER).map(
-  ([type, filter]) => ({
+export const generateFilter = (points: Point[]) => Object.entries(filter).map(
+  ([type, filterCount]) => ({
     type,
-    count: filter(points).length
+    count: filterCount(points).length
   })
 );
 

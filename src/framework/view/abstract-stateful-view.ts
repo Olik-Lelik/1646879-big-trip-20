@@ -1,17 +1,17 @@
-import AbstractView from './abstract-view.js';
+import AbstractView from './abstract-view';
 
 /**
  * Абстрактный класс представления с состоянием
  */
-export default class AbstractStatefulView extends AbstractView {
-  /** @type {Object} Объект состояния */
-  _state = {};
+export default class AbstractStatefulView<State> extends AbstractView {
+  /** Объект состояния */
+  _state: State = null;
 
   /**
    * Метод для обновления состояния и перерисовки элемента
-   * @param {Object} update Объект с обновлённой частью состояния
+   * @param update Объект с обновлённой частью состояния
    */
-  updateElement(update) {
+  updateElement(update: Partial<State>) {
     if (!update) {
       return;
     }
@@ -31,9 +31,9 @@ export default class AbstractStatefulView extends AbstractView {
 
   /**
    * Метод для обновления состояния
-   * @param {Object} update Объект с обновлённой частью состояния
+   * @param update Объект с обновлённой частью состояния
    */
-  _setState(update) {
+  _setState(update: State | Partial<State>) {
     this._state = structuredClone({...this._state, ...update});
   }
 

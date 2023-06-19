@@ -25,7 +25,12 @@ const CITIES = [
   'Minsk',
   'Santiago',
   'Havana',
-  'Rome'
+  'Rome',
+  'London',
+  'Berlin',
+  'Madrid',
+  'Prague',
+  'Moscow',
 ] as const;
 
 const DESCRIPTION = 'Phasellus eros mauris, condimentum sed nibh vitae, sodales efficitur ipsum. Sed blandit, eros vel aliquam faucibus, purus ex euismod diam, eu luctus nunc ante ut dui. Sed sed nisi sed augue convallis suscipit in sed felis. Aliquam erat volutpat. Nunc fermentum tortor ac porta dapibus. In rutrum ac purus sit amet tempus.';
@@ -42,7 +47,7 @@ const FORMAT_DURATION = {
 type FilterType = 'everything' | 'future' | 'present' | 'past';
 type PointFilter = (points: Point[]) => Point[];
 
-const FILTER: Record<FilterType, PointFilter> = {
+const filter: Record<FilterType, PointFilter> = {
   'everything': (points: Point[]) => points,
   'future': (points: Point[]) => points.filter(isPointFuture),
   'present': (points: Point[]) => points.filter(isPointPresent),
@@ -65,4 +70,4 @@ const sort: Record<SortType, PointSort> = {
 };
 
 
-export {VALUE, TYPES, CITIES, DESCRIPTION, MSEC_IN_DAY, MSEC_IN_HOUR, FORMAT_DURATION, FilterType, FILTER, SortType, sort};
+export {VALUE, TYPES, CITIES, DESCRIPTION, MSEC_IN_DAY, MSEC_IN_HOUR, FORMAT_DURATION, FilterType, filter, SortType, sort};
