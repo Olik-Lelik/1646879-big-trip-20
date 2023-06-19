@@ -1,3 +1,4 @@
+// import { FilterType } from '../const';
 import AbstractView from '../framework/view/abstract-view';
 
 interface FilterItem {
@@ -22,15 +23,29 @@ function createTemplate(filterPoints: FilterItem[]) {
 </form>`;
 }
 
+type Filter = {
+  filterPoints: FilterItem[],
+  // onFilterChange(filterType: FilterType): void,
+}
+
 export default class FiltersView extends AbstractView {
   #filterPoints;
+  // #onFilterChange: (filterType: FilterType) => void;
 
-  constructor(filterPoints: FilterItem[]) {
+  constructor({filterPoints}: Filter) {
     super();
     this.#filterPoints = filterPoints;
+    // this.#onFilterChange = onFilterChange;
+
+    // this.element.addEventListener('change', this.#filterChangeHandler);
   }
 
   get template() {
     return createTemplate(this.#filterPoints);
   }
+
+  // #filterChangeHandler = (evt: Event) => {
+  //   evt.preventDefault();
+  //   this.#onFilterChange((evt.target as HTMLInputElement).value as FilterType);
+  // };
 }

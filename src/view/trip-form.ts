@@ -1,7 +1,12 @@
-import dayjs from 'dayjs';
 import { TYPES } from '../const';
 import { Destination, Offer, OfferItem, Picture, Point } from '../types/types';
 import AbstractStatefulView from '../framework/view/abstract-stateful-view';
+import flatpickr from 'flatpickr';
+
+import 'flatpickr/dist/flatpickr.min.css';
+// const enum FormName {
+//   PRICE = 'event-price'
+// }
 
 function createDestinationOption({name}: Destination){
 /*html*/return `<option value="${name}"></option>`;
@@ -25,7 +30,7 @@ function createEventOffersSection(offers: OfferItem[], point: Point) {
 
   <div class="event__available-offers">
     ${offers.map(({id, title, price}: OfferItem) => /*html*/ `<div class="event__offer-selector">
-    <input class="event__offer-checkbox  visually-hidden" id="event-offer-${id}" type="checkbox" name="event-offer-${point.type}" ${isChecked(id)}>
+    <input class="event__offer-checkbox  visually-hidden" id="event-offer-${id}" data-offer-id="${id}" type="checkbox" name="event-offer-${point.type}" ${isChecked(id)}>
     <label class="event__offer-label" for="event-offer-${id}">
       <span class="event__offer-title">${title}</span>
       &plus;&euro;&nbsp;
@@ -104,10 +109,10 @@ function createTemplate({point, destinations, destination, getOffersByType}: Gen
 
   <div class="event__field-group  event__field-group--time">
     <label class="visually-hidden" for="event-start-time-1">From</label>
-    <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="${dayjs(dateFrom).format('DD/MM/YYYY HH:mm')}">
+    <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="${dateFrom}">
     &mdash;
     <label class="visually-hidden" for="event-end-time-1">To</label>
-    <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="${dayjs(dateTo).format('DD/MM/YYYY HH:mm')}">
+    <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="${dateTo}">
   </div>
 
   <div class="event__field-group  event__field-group--price">
@@ -136,50 +141,64 @@ type FormViewProps = GeneralProps & {
   point: Point;
   onRollupClick(): void;
   onFormSubmit(point: Point): void;
+  // onFormReset(): void;
 }
 
 interface State {
   point: Point;
   destination: Destination;
 }
-export default class FormView extends AbstractStatefulView {
+
+// interface MainForm extends HTMLFormElement {
+//   [FormName.PRICE]: HTMLInputElement;
+// }
+export default class FormView extends AbstractStatefulView<State> {
   #destinations: Destination[];
   #onRollupClick: () => void;
   #onFormSubmit: (point: Point) => void;
   #getOffersByType: (type: Offer['type']) => OfferItem[];
   #getDestinationByCity: (city: string) => Destination;
-
-  declare _state: State;
-
-  // declare _setState(update: State): void;
+  // #onFormReset: () => void;
+  #datePickerFrom: any = null;
+  #datePickerTo: any = null;
 
   constructor({point, destinations, destination, onRollupClick, onFormSubmit, getOffersByType, getDestinationByCity}: FormViewProps) {
     super();
-    this._setState({
-      point: {...point},
-      destination
-    });
+    this._setState(FormView.parsePointToState(point, destination));
     this.#destinations = destinations;
     this.#onRollupClick = onRollupClick;
     this.#onFormSubmit = onFormSubmit;
     this.#getOffersByType = getOffersByType;
     this.#getDestinationByCity = getDestinationByCity;
+    // this.#onFormReset = onFormReset;
 
     this._restoreHandlers();
   }
 
   _restoreHandlers = () => {
-    this.element.querySelector('form')
-      .addEventListener('submit', this.#formSubmitHandler);
+    const form = this.element.querySelector<HTMLFormElement>('form');
+    form.addEventListener('submit', this.#formSubmitHandler);
+    // form.addEventListener('reset', this.#onFormReset);
 
     this.element.querySelector<HTMLButtonElement>('.event__rollup-btn')
       .addEventListener('click', this.#buttonRollupHandler);
 
     this.element.querySelector<HTMLElement>('.event__type-group')
-      .addEventListener('change', this.#typePointClick);
+      .addEventListener('change', this.#routeTypeHandler);
 
     this.element.querySelector<HTMLInputElement>('.event__input--destination')
-      .addEventListener('change', this.#cityChange);
+      .addEventListener('change', this.#citySelectionHandler);
+
+    const availableOffersElement = this.element.querySelector('.event__available-offers');
+
+    if(availableOffersElement) {
+      availableOffersElement.addEventListener('click', this.#offerClickHandler);
+    }
+
+    this.element.querySelector('.event__input--price')
+      .addEventListener('change', this.#priceInputChange);
+
+    this.#setDatePicker();
   };
 
   get template() {
@@ -193,9 +212,28 @@ export default class FormView extends AbstractStatefulView {
     });
   }
 
+  removeElement() {
+    super.removeElement();
+
+    if(this.#datePickerFrom) {
+      this.#datePickerFrom.destroy();
+      this.#datePickerFrom = null;
+    }
+
+    if(this.#datePickerTo) {
+      this.#datePickerTo.destroy();
+      this.#datePickerTo = null;
+    }
+  }
+
+  reset(point: Point, destination: Destination) {
+    this.updateElement(FormView.parsePointToState(point, destination));
+  }
+
   #formSubmitHandler = (evt: SubmitEvent) => {
     evt.preventDefault();
-    this.#onFormSubmit(FormView.parseStateToPoint(this._state.point));
+    // const form = evt.target as MainForm;
+    this.#onFormSubmit(FormView.parseStateToPoint(this._state));
   };
 
   #buttonRollupHandler = (evt: Event) => {
@@ -203,18 +241,19 @@ export default class FormView extends AbstractStatefulView {
     this.#onRollupClick();
   };
 
-  #typePointClick = (evt: Event) => {
+  #routeTypeHandler = (evt: Event) => {
     evt.preventDefault();
-    const input = evt.target as HTMLInputElement;
 
     this.updateElement({
-      ...this._state,
-      type: input.value,
-      offers: []
+      point: {
+        ...this._state.point,
+        type: (evt.target as HTMLInputElement).value as Offer['type'],
+        offers: []
+      }
     });
   };
 
-  #cityChange = (evt: Event) => {
+  #citySelectionHandler = (evt: Event) => {
     const city = (evt.target as HTMLInputElement).value;
 
     if (city === this._state.destination.name || city === '') {
@@ -234,6 +273,80 @@ export default class FormView extends AbstractStatefulView {
     }
   };
 
+  #offerClickHandler = () => {
+    const checkedOffers = Array.from(this.element.querySelectorAll('.event__offer-checkbox:checked'));
+
+    const offersIds = checkedOffers.map((offer: Element) => (offer as HTMLElement).dataset.offerId);
+
+    this._setState({
+      point: {
+        ...this._state.point,
+        offers: offersIds
+      }
+    });
+  };
+
+  #priceInputChange = (evt: Event) => {
+    evt.preventDefault();
+
+    this._setState({
+      point: {
+        ...this._state.point,
+        price: (evt.target as HTMLInputElement).valueAsNumber
+      }
+    });
+  };
+
+  #dateFromChangeHandler = ([userDate]: Date[]) => {
+    this.updateElement({
+      point: {
+        ...this._state.point,
+        dateFrom: userDate,
+      }
+    });
+  };
+
+  #dateToChangeHandler = ([userDate]: Date[]) => {
+    this.updateElement({
+      point: {
+        ...this._state.point,
+        dateTo: userDate,
+      }
+    });
+  };
+
+  #setDatePicker() {
+    const [dateFrom, dateTo] = this.element.querySelectorAll('.event__input--time');
+    this.#datePickerFrom = flatpickr(
+      dateFrom,
+      {
+        dateFormat: 'd/m/y H:i',
+        defaultDate: this._state.point.dateFrom,
+        maxDate: this._state.point.dateTo,
+        enableTime: true,
+        'time_24hr': true,
+        'locale': {
+          'firstDayOfWeek': 1 // start week on Monday
+        },
+        onChange: this.#dateFromChangeHandler
+      }
+    );
+    this.#datePickerTo = flatpickr(
+      dateTo,
+      {
+        dateFormat: 'd/m/y H:i',
+        defaultDate: this._state.point.dateTo,
+        minDate: this._state.point.dateFrom,
+        enableTime: true,
+        'time_24hr': true,
+        'locale': {
+          'firstDayOfWeek': 1 // start week on Monday
+        },
+        onChange: this.#dateToChangeHandler
+      }
+    );
+  }
+
   static parsePointToState(point: Point, destination: Destination) {
     return {
       point: {...point},
@@ -241,9 +354,9 @@ export default class FormView extends AbstractStatefulView {
     };
   }
 
-  static parseStateToPoint(state: Point) {
+  static parseStateToPoint(state: State) {
     return {
-      ...state
+      ...state.point,
     };
   }
 }

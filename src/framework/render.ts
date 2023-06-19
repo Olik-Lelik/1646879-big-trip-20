@@ -1,4 +1,4 @@
-import AbstractView from './view/abstract-view.js';
+import AbstractView from './view/abstract-view';
 
 /**
  * Функция для создания элемента на основе разметки

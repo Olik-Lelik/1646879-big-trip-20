@@ -8,7 +8,7 @@ import { generateFilter } from '../mock/filter';
 import { Point } from '../types/types';
 import MessageView from '../view/message';
 import { updatePoint } from '../utils';
-import { SortType, sort } from '../const';
+import { FilterType, SortType, sort } from '../const';
 
 interface Props {
   container: Element;
@@ -25,7 +25,7 @@ export default class Presenter {
   #pointsModel;
   #points: Point[];
   #pointPresenters: Map<Point['id'], PointPresenter> = new Map();
-  #sortComponent: SortView = null;
+  #currentFilterType: FilterType = 'everything';
   #currentSortType: SortType = 'day';
 
   constructor({container, destinationsModel, offersModel, pointsModel}: Props) {
@@ -75,6 +75,20 @@ export default class Presenter {
     this.#pointPresenters.forEach((presenter: PointPresenter) => presenter.resetView());
   };
 
+  // #filterPoints(filterType: FilterType) {
+  //   this.#currentFilterType = filterType;
+  //   this.#points = filter[this.#currentFilterType](this.#points);
+  // }
+
+  // #handleFilterChange = (filterType: FilterType) => {
+  //   if(this.#currentFilterType === filterType) {
+  //     return;
+  //   }
+  //   this.#filterPoints(filterType);
+  //   this.#clearPointsList();
+  //   this.#renderPoints();
+  // };
+
   #sortPoints(sortType: SortType) {
     this.#currentSortType = sortType;
     this.#points = sort[this.#currentSortType](this.#points);
@@ -97,7 +111,12 @@ export default class Presenter {
   }
 
   #renderFilters() {
-    render(this.#controlsFiltersElement, new FiltersView(generateFilter(this.#points)));
+    const filters = generateFilter(this.#points);
+    const filterComponent = new FiltersView({
+      filterPoints: filters
+      // onFilterChange: this.#handleFilterChange,
+    });
+    render(this.#controlsFiltersElement, filterComponent);
   }
 
   #renderMessageEverything() {

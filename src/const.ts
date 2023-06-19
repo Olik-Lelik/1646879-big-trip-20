@@ -47,7 +47,7 @@ const FORMAT_DURATION = {
 type FilterType = 'everything' | 'future' | 'present' | 'past';
 type PointFilter = (points: Point[]) => Point[];
 
-const FILTER: Record<FilterType, PointFilter> = {
+const filter: Record<FilterType, PointFilter> = {
   'everything': (points: Point[]) => points,
   'future': (points: Point[]) => points.filter(isPointFuture),
   'present': (points: Point[]) => points.filter(isPointPresent),
@@ -70,4 +70,4 @@ const sort: Record<SortType, PointSort> = {
 };
 
 
-export {VALUE, TYPES, CITIES, DESCRIPTION, MSEC_IN_DAY, MSEC_IN_HOUR, FORMAT_DURATION, FilterType, FILTER, SortType, sort};
+export {VALUE, TYPES, CITIES, DESCRIPTION, MSEC_IN_DAY, MSEC_IN_HOUR, FORMAT_DURATION, FilterType, filter, SortType, sort};

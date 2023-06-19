@@ -46,7 +46,6 @@ export default class MockService {
       const offerIds = offers.length ? offers.slice(0, getRandom(0, offers.length))
         .map(({id}) => id) : [];
 
-
       return createPoint(type, destination.id, offerIds);
     });
   }
