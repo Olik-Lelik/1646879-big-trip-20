@@ -1,24 +1,33 @@
 import TripInfo from './view/trip-info';
 import Presenter from './presenter/presenter';
-import MockService from './service/mock-service';
+// import MockService from './service/mock-service';
 import {DestinationsModel, FilterModel, OffersModel, PointsModel} from './model';
 import { render } from './framework/render';
 import FilterPresenter from './presenter/filter-presenter';
 import NewPointButton from './view/new-button';
+import PointsApiService from './view/points-api-service';
 
 const siteHeaderElement = document.querySelector<HTMLElement>('.trip-main');
 const siteMainElement = document.querySelector<HTMLElement>('.trip-events');
 
-const mock = new MockService();
-const destinationsModel = new DestinationsModel(mock);
-const offersModel = new OffersModel(mock);
-const pointsModel = new PointsModel(mock);
+const AUTHORIZATION = 'Basic hfyiki846vnndh' as const;
+const END_POINT = 'https://20.ecmascript.pages.academy/big-trip' as const;
+
+const pointsModel = new PointsModel({
+  service: new PointsApiService({
+    endPoint: END_POINT,
+    authorization: AUTHORIZATION,
+  })
+});
+
+// const destinationsModel = new DestinationsModel(mock);
+// const offersModel = new OffersModel(mock);
 const filterModel = new FilterModel();
 
 const presenter = new Presenter({
   container: siteMainElement,
-  destinationsModel,
-  offersModel,
+  // destinationsModel,
+  // offersModel,
   pointsModel,
   filterModel,
   onNewPointDestroy: handleNewPointFormClose
@@ -51,6 +60,8 @@ render(siteHeaderElement, new TripInfo({
   dateTo: new Date(2023, 4, 22),
   price: 1000,
 }), 'afterbegin');
+
+pointsModel.init();
 
 filterPresenter.init();
 presenter.init();

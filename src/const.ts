@@ -44,8 +44,15 @@ const FORMAT_DURATION = {
   'DDHHmm': 'DD[D] HH[H] mm[M]'
 } as const;
 
+const UpdateType = {
+  PATCH :'patch',
+  MINOR :'minor',
+  MAJOR :'major',
+  INIT :'init'
+} as const;
+
 type UserAction = 'update_point' | 'add_point' | 'delete_point';
-type UpdateType = 'patch' | 'minor' | 'major';
+type UpdateType = 'patch' | 'minor' | 'major' | 'init';
 
 type FilterType = 'EVERYTHING' | 'FUTURE' | 'PRESENT' | 'PAST';
 type PointFilter = (points: Point[]) => Point[];

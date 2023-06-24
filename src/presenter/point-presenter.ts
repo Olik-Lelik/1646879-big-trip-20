@@ -2,14 +2,15 @@ import {remove, render, replace} from '../framework/render';
 
 import FormView from '../view/trip-form';
 import PointView from '../view/trip-point';
-import {DestinationsModel, OffersModel} from '../model';
-import { OfferType, Point } from '../types/types.js';
+import {PointsModel} from '../model';
+import { Point } from '../types/types.js';
 import { UpdateType, UserAction } from '../const';
 
 interface Model {
   container: HTMLElement,
-  destinationsModel: DestinationsModel,
-  offersModel: OffersModel,
+  pointsModel: PointsModel,
+  // destinationsModel: DestinationsModel,
+  // offersModel: OffersModel,
   onDataChange(userAction: UserAction, updateType: UpdateType, updatePoint: Point): void,
   onModeChange(): void,
 }
@@ -20,8 +21,9 @@ const enum Mode {
 }
 export default class PointPresenter {
   #container: HTMLElement;
-  #destinations: DestinationsModel;
-  #offers: OffersModel;
+  #pointsModel: PointsModel;
+  // #destinations: DestinationsModel;
+  // #offers: OffersModel;
   #itemView: PointView | null = null;
   #itemEditView: FormView | null = null;
   #point: Point = null;
@@ -29,10 +31,11 @@ export default class PointPresenter {
   #pointChangeHandler: (userAction: UserAction, updateType: UpdateType, updatePoint: Point) => void;
   #modeChangeHandler: () => void;
 
-  constructor({container, destinationsModel, offersModel, onDataChange, onModeChange}: Model) {
+  constructor({container, pointsModel, onDataChange, onModeChange}: Model) {
     this.#container = container;
-    this.#destinations = destinationsModel;
-    this.#offers = offersModel;
+    this.#pointsModel = pointsModel;
+    // this.#destinations = destinationsModel;
+    // this.#offers = offersModel;
     this.#pointChangeHandler = onDataChange;
     this.#modeChangeHandler = onModeChange;
   }
@@ -45,16 +48,16 @@ export default class PointPresenter {
 
     this.#itemView = new PointView({
       point,
-      currentDestination: this.#destinations.getById(point.destination),
-      currentOffers: this.#offers.getByType(point.type),
+      currentDestination: this.#pointsModel.getById(point.destination),
+      currentOffers: this.#pointsModel.getByType(point.type),
       onEditClick: this.#replacePointToEdit,
       onFavoriteClick: this.#favoriteClickHandler,
     });
 
     this.#itemEditView = new FormView({
       point,
-      destinations: this.#destinations.get,
-      offers: this.#offers.get,
+      destinations: this.#pointsModel.destinations,
+      offers: this.#pointsModel.offers,
       // destination: this.#destinations.getById(point.destination),
       // getDestinationByCity: this.#destinations.getByCity.bind(this.#destinations),
       // getOffersByType: (type: OfferType) => this.#offers.getByType(type),

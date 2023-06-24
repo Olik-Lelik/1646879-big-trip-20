@@ -36,10 +36,20 @@ interface Point {
   offers: OfferItem['id'][],
   type: OfferType
 }
+interface PointService {
+  id: string,
+  base_price: number,
+  date_from: string,
+  date_to: string,
+  destination: string,
+  is_favorite: boolean,
+  offers: [],
+  type: string
+}
 
 interface Filter {
   type: FilterType,
   count: number
 }
 
-export { OfferType, City, Destination, Picture, OfferItem, Offer, Point, Filter };
+export { OfferType, City, Destination, Picture, OfferItem, Offer, Point, Filter, PointService };
