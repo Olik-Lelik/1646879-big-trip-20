@@ -2,11 +2,13 @@ import AbstractView from '../framework/view/abstract-view';
 import { Destination, OfferItem, Point } from '../types/types';
 import{ getDateDuration, formatStringToDateTime, formatStringToShortDateTime, formatStringToHumanizeDateTime, formatStringToTime } from '../utils';
 
-const createOfferItem = ({title, price}: OfferItem) => /*html*/`<li class="event__offer">
+function createOfferItem(offers: OfferItem[]) {
+  return offers.map(({title, price}: OfferItem) => /*html*/`<li class="event__offer">
 <span class="event__offer-title">${title}</span>
 &plus;&euro;&nbsp;
 <span class="event__offer-price">${price}</span>
-</li>`;
+</li>`).join('');
+}
 
 interface GeneralProps {
   point: Point;
@@ -23,6 +25,7 @@ function createTemplate({point, currentDestination, currentOffers}: GeneralProps
   const {price, dateFrom, dateTo, favorite, type} = point;
 
   const hasFavorite = favorite ? '--active' : '';
+  const checkedOffers = point.offers.map((offerId: OfferItem['id']) => currentOffers.find(({id}) => id === offerId));
 
   return `<li class="trip-events__item">
   <div class="event">
@@ -44,7 +47,7 @@ function createTemplate({point, currentDestination, currentOffers}: GeneralProps
     </p>
     <h4 class="visually-hidden">Offers:</h4>
     <ul class="event__selected-offers">
-      ${currentOffers.map(createOfferItem).join('')}
+      ${createOfferItem(checkedOffers)}
     </ul>
     <button class="event__favorite-btn event__favorite-btn${hasFavorite}" type="button">
       <span class="visually-hidden">Add to favorite</span>

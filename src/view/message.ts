@@ -11,7 +11,7 @@ type Option = {
   status: 'loading'
 } | {
   status: 'empty',
-  chosenFilter: keyof typeof FilterType
+  filterType: keyof typeof FilterType
 };
 
 function getMessage(options: Option) {
@@ -19,10 +19,10 @@ function getMessage(options: Option) {
     return 'Loading...';
   }
 
-  return FilterType[options.chosenFilter];
+  return FilterType[options.filterType];
 }
 
-export default class MessageView extends AbstractView{
+export default class MessageView extends AbstractView {
   #message;
 
   constructor(options: Option) {

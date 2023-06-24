@@ -4,12 +4,13 @@ import FormView from '../view/trip-form';
 import PointView from '../view/trip-point';
 import {DestinationsModel, OffersModel} from '../model';
 import { OfferType, Point } from '../types/types.js';
+import { UpdateType, UserAction } from '../const';
 
 interface Model {
   container: HTMLElement,
   destinationsModel: DestinationsModel,
   offersModel: OffersModel,
-  onDataChange(updatedPoint: Point): void,
+  onDataChange(userAction: UserAction, updateType: UpdateType, updatePoint: Point): void,
   onModeChange(): void,
 }
 
@@ -25,7 +26,7 @@ export default class PointPresenter {
   #itemEditView: FormView | null = null;
   #point: Point = null;
   #mode = Mode.DEFAULT;
-  #pointChangeHandler: (updatedPoint: Point) => void;
+  #pointChangeHandler: (userAction: UserAction, updateType: UpdateType, updatePoint: Point) => void;
   #modeChangeHandler: () => void;
 
   constructor({container, destinationsModel, offersModel, onDataChange, onModeChange}: Model) {
@@ -53,12 +54,15 @@ export default class PointPresenter {
     this.#itemEditView = new FormView({
       point,
       destinations: this.#destinations.get,
-      destination: this.#destinations.getById(point.destination),
-      getDestinationByCity: this.#destinations.getByCity.bind(this.#destinations),
-      getOffersByType: (type: OfferType) => this.#offers.getByType(type),
-      onRollupClick: this.#replaceEditToPoint,
-      onFormSubmit: this.#formSubmitHandler,
-      // onFormReset: this.#replaceEditToPoint,
+      offers: this.#offers.get,
+      // destination: this.#destinations.getById(point.destination),
+      // getDestinationByCity: this.#destinations.getByCity.bind(this.#destinations),
+      // getOffersByType: (type: OfferType) => this.#offers.getByType(type),
+      typeForm: 'editing',
+      onFormSubmit: this.#handleFormSubmit,
+      onToggleClick: this.#replaceEditToPoint,
+      onCancleClick: this.#replaceEditToPoint,
+      onDeleteClick: this.#handlePointDelete,
     });
 
     if(prevItemView === null || prevEditView === null) {
@@ -83,9 +87,9 @@ export default class PointPresenter {
   }
 
   resetView() {
-    const isCurrentDestination = this.#destinations.getById(this.#point.destination);
+    // const isCurrentDestination = this.#destinations.getById(this.#point.destination);
     if(this.#mode !== Mode.DEFAULT) {
-      this.#itemEditView.reset(this.#point, isCurrentDestination);
+      this.#itemEditView.reset(this.#point);
       this.#replaceEditToPoint();
     }
   }
@@ -104,24 +108,33 @@ export default class PointPresenter {
   };
 
   #escKeyDownHandler = (evt: KeyboardEvent) => {
-    const isCurrentDestination = this.#destinations.getById(this.#point.destination);
+    // const isCurrentDestination = this.#destinations.getById(this.#point.destination);
     if (evt.key === 'Escape' || evt.key === 'Esc') {
       evt.preventDefault();
-      this.#itemEditView.reset(this.#point, isCurrentDestination);
+      // this.#itemEditView.reset(this.#point, isCurrentDestination);
+      this.#itemEditView.reset(this.#point);
       this.#replaceEditToPoint();
       document.removeEventListener('keydown', this.#escKeyDownHandler);
     }
   };
 
-  #formSubmitHandler = (point: Point) => {
-    this.#pointChangeHandler(point);
+  #favoriteClickHandler = () => {
+    this.#pointChangeHandler(
+      'update_point',
+      'patch',
+      {
+        ...this.#point,
+        favorite: !this.#point.favorite
+      }
+    );
+  };
+
+  #handleFormSubmit = (updatePoint: Point) => {
+    this.#pointChangeHandler('update_point', 'minor', updatePoint);
     this.#replaceEditToPoint();
   };
 
-  #favoriteClickHandler = () => {
-    this.#pointChangeHandler({
-      ...this.#point,
-      favorite: !this.#point.favorite
-    });
+  #handlePointDelete = (point: Point) => {
+    this.#pointChangeHandler('delete_point', 'minor', point);
   };
 }

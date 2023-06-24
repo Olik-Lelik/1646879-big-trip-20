@@ -1,12 +1,70 @@
 import { TYPES } from '../const';
-import { Destination, Offer, OfferItem, Picture, Point } from '../types/types';
 import AbstractStatefulView from '../framework/view/abstract-stateful-view';
+import { Destination, Offer, OfferItem, Picture, Point } from '../types/types';
 import flatpickr from 'flatpickr';
+import he from 'he';
 
 import 'flatpickr/dist/flatpickr.min.css';
-// const enum FormName {
-//   PRICE = 'event-price'
+
+type EditType = 'editing' | 'creating';
+
+interface GeneralProps {
+  state: Point;
+  destinations: Destination[];
+  offers: Offer[];
+  typeForm: EditType;
+  // destination: Destination;
+  // getOffersByType(type: Offer['type']): OfferItem[];
+  // getDestinationByCity(city: Destination['name']): Destination;
+}
+
+interface FormViewProps {
+  point?: Point;
+  destinations?: Destination[];
+  offers?: Offer[];
+  typeForm: EditType;
+  onToggleClick?(): void;
+  onFormSubmit(point: Point): void;
+  onDeleteClick?(point: Point): void;
+  onCancleClick(): void;
+}
+
+const POINT_EMPTY = {
+  id: '',
+  price: 0,
+  dateFrom: Date,
+  dateTo: Date,
+  destination: '',
+  favorite: false,
+  offers: [],
+  type: 'Taxi'
+} as const;
+
+// interface State {
+//   point: Point;
+//   // destination: Destination;
 // }
+
+const ButtonName = {
+  'editing': 'Delete',
+  'creating': 'Cancle'
+} as const;
+
+function createResetButton(type: EditType) {
+  return `<button class="event__reset-btn" type="reset">${ButtonName[type]}</button>`;
+}
+function createRollupButton(type: EditType) {
+  if (type === 'creating') {
+    return;
+  }
+  return `<button class="event__rollup-btn" type="button">
+  <span class="visually-hidden">Open event</span></button>`;
+}
+function createFormButtons(type: EditType) {
+  return `<button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
+  ${createResetButton(type)}
+  ${createRollupButton(type)}`;
+}
 
 function createDestinationOption({name}: Destination){
 /*html*/return `<option value="${name}"></option>`;
@@ -66,18 +124,13 @@ function createEventDestinationSection(destination: Destination) {
   </section>` : '');
 }
 
-interface GeneralProps {
-  point: Point;
-  destinations: Destination[];
-  destination: Destination;
-  getOffersByType(type: Offer['type']): OfferItem[];
-  getDestinationByCity(city: Destination['name']): Destination;
-}
+function createTemplate({state, destinations, offers, typeForm}: GeneralProps) {
+  const {price, dateFrom, dateTo} = state;
 
-function createTemplate({point, destinations, destination, getOffersByType}: GeneralProps) {
-  const {price, dateFrom, dateTo} = point;
 
-  const currentOffers = getOffersByType(point.type);
+  // const currentOffers = getOffersByType(point.type);
+  const currentDestination = destinations.find((element) => element.id === state.destination);
+  const currentOffers = offers.find((element) => element.type === state.type).offers;
 
   return /*html*/`<li class="trip-events__item">
   <form class="event event--edit" action="#" method="post">
@@ -85,23 +138,23 @@ function createTemplate({point, destinations, destination, getOffersByType}: Gen
   <div class="event__type-wrapper">
     <label class="event__type  event__type-btn" for="event-type-toggle-1">
       <span class="visually-hidden">Choose event type</span>
-      <img class="event__type-icon" width="17" height="17" src="img/icons/${point.type}.png" alt="Event type icon">
+      <img class="event__type-icon" width="17" height="17" src="img/icons/${state.type}.png" alt="Event type icon">
     </label>
     <input class="event__type-toggle  visually-hidden" id="event-type-toggle-1" type="checkbox">
 
     <div class="event__type-list">
       <fieldset class="event__type-group">
         <legend class="visually-hidden">Event type</legend>
-        ${TYPES.map((type) => createEventTypeItem(type, point)).join('')}
+        ${TYPES.map((type) => createEventTypeItem(type, state)).join('')}
       </fieldset>
     </div>
   </div>
 
   <div class="event__field-group  event__field-group--destination">
     <label class="event__label  event__type-output" for="event-destination-1">
-    ${point.type}
+    ${state.type}
     </label>
-    <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${destination.name}" list="destination-list-1">
+    <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${he.encode(currentDestination.name)}" list="destination-list-1">
     <datalist id="destination-list-1">
       ${destinations.map(createDestinationOption).join('')}
     </datalist>
@@ -123,65 +176,59 @@ function createTemplate({point, destinations, destination, getOffersByType}: Gen
     <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${price}">
   </div>
 
-  <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
-  <button class="event__reset-btn" type="reset">Cancel</button>
-  <button class="event__rollup-btn" type="button">
-  <span class="visually-hidden">Open event</span>
-  </button>
+  ${createFormButtons(typeForm)}
   </header>
   <section class="event__details">
-  ${createEventOffersSection(currentOffers, point)}
-  ${createEventDestinationSection(destination)}
+  ${createEventOffersSection(currentOffers, state)}
+  ${createEventDestinationSection(currentDestination)}
   </section>
   </form>
   </li>`;
 }
 
-type FormViewProps = GeneralProps & {
-  point: Point;
-  onRollupClick(): void;
-  onFormSubmit(point: Point): void;
-  // onFormReset(): void;
-}
-
-interface State {
-  point: Point;
-  destination: Destination;
-}
-
-// interface MainForm extends HTMLFormElement {
-//   [FormName.PRICE]: HTMLInputElement;
-// }
-export default class FormView extends AbstractStatefulView<State> {
+export default class FormView extends AbstractStatefulView<Point> {
   #destinations: Destination[];
-  #onRollupClick: () => void;
-  #onFormSubmit: (point: Point) => void;
-  #getOffersByType: (type: Offer['type']) => OfferItem[];
-  #getDestinationByCity: (city: string) => Destination;
-  // #onFormReset: () => void;
-  #datePickerFrom: any = null;
-  #datePickerTo: any = null;
+  #offers: Offer[];
+  #typeForm: EditType;
+  #datePickerFrom: flatpickr.Instance = null;
+  #datePickerTo: flatpickr.Instance = null;
+  // #getOffersByType: (type: Offer['type']) => OfferItem[];
+  // #getDestinationByCity: (city: string) => Destination;
+  #handleToggleClick: () => void;
+  #handleFormSubmit: (point: Point) => void;
+  #handleDeleteClick: (point: Point) => void;
+  #handleCancleClick: () => void;
 
-  constructor({point, destinations, destination, onRollupClick, onFormSubmit, getOffersByType, getDestinationByCity}: FormViewProps) {
+  constructor({point, destinations, offers, onToggleClick, onFormSubmit, onDeleteClick, onCancleClick, typeForm}: FormViewProps) {
     super();
-    this._setState(FormView.parsePointToState(point, destination));
+    this._setState(FormView.parsePointToState(point));
     this.#destinations = destinations;
-    this.#onRollupClick = onRollupClick;
-    this.#onFormSubmit = onFormSubmit;
-    this.#getOffersByType = getOffersByType;
-    this.#getDestinationByCity = getDestinationByCity;
-    // this.#onFormReset = onFormReset;
+    this.#offers = offers;
+    this.#typeForm = typeForm;
+    // this.#getOffersByType = getOffersByType;
+    // this.#getDestinationByCity = getDestinationByCity;
+    this.#handleToggleClick = onToggleClick;
+    this.#handleFormSubmit = onFormSubmit;
+    this.#handleDeleteClick = onDeleteClick;
+    this.#handleCancleClick = onCancleClick;
 
     this._restoreHandlers();
   }
 
   _restoreHandlers = () => {
-    const form = this.element.querySelector<HTMLFormElement>('form');
-    form.addEventListener('submit', this.#formSubmitHandler);
-    // form.addEventListener('reset', this.#onFormReset);
+    this.element.querySelector<HTMLFormElement>('form')
+      .addEventListener('submit', this.#formSubmitHandler);
+
+    const resetButton = this.element.querySelector<HTMLFormElement>('.event__reset-btn');
+
+    if (resetButton.textContent === ButtonName['creating']) {
+      resetButton.addEventListener('click', this.#pointCancleHandler);
+    } else {
+      resetButton.addEventListener('click', this.#pointDeleteHandler);
+    }
 
     this.element.querySelector<HTMLButtonElement>('.event__rollup-btn')
-      .addEventListener('click', this.#buttonRollupHandler);
+      .addEventListener('click', this.#toggleClickHandler);
 
     this.element.querySelector<HTMLElement>('.event__type-group')
       .addEventListener('change', this.#routeTypeHandler);
@@ -202,13 +249,15 @@ export default class FormView extends AbstractStatefulView<State> {
   };
 
   get template() {
-    const {point, destination} = this._state;
+    const state = this._state;
     return createTemplate({
-      point,
-      destination,
+      state,
+      offers: this.#offers,
       destinations: this.#destinations,
-      getOffersByType: this.#getOffersByType,
-      getDestinationByCity: this.#getDestinationByCity
+      typeForm: this.#typeForm,
+      // destination,
+      // getOffersByType: this.#getOffersByType,
+      // getDestinationByCity: this.#getDestinationByCity
     });
   }
 
@@ -226,49 +275,60 @@ export default class FormView extends AbstractStatefulView<State> {
     }
   }
 
-  reset(point: Point, destination: Destination) {
-    this.updateElement(FormView.parsePointToState(point, destination));
+  reset(point: Point) {
+    this.updateElement(point);
   }
+  // reset(point: Point) {
+  //   this.updateElement(FormView.parsePointToState(point));
+  // }
 
   #formSubmitHandler = (evt: SubmitEvent) => {
     evt.preventDefault();
-    // const form = evt.target as MainForm;
-    this.#onFormSubmit(FormView.parseStateToPoint(this._state));
+    this.#handleFormSubmit(FormView.parseStateToPoint(this._state));
   };
 
-  #buttonRollupHandler = (evt: Event) => {
+  #pointDeleteHandler = (evt: SubmitEvent) => {
     evt.preventDefault();
-    this.#onRollupClick();
+    this.#handleDeleteClick(FormView.parseStateToPoint(this._state));
+  };
+
+  #pointCancleHandler = (evt: Event) => {
+    evt.preventDefault();
+    this.#handleCancleClick();
+  };
+
+  #toggleClickHandler = (evt: Event) => {
+    evt.preventDefault();
+    this.#handleToggleClick();
   };
 
   #routeTypeHandler = (evt: Event) => {
     evt.preventDefault();
 
     this.updateElement({
-      point: {
-        ...this._state.point,
-        type: (evt.target as HTMLInputElement).value as Offer['type'],
-        offers: []
-      }
+      ...this._state,
+      type: (evt.target as HTMLInputElement).value as Offer['type'],
+      offers: []
     });
   };
 
   #citySelectionHandler = (evt: Event) => {
     const city = (evt.target as HTMLInputElement).value;
 
-    if (city === this._state.destination.name || city === '') {
-      return;
-    }
+    // if (city === this._state.destination.name || city === '') {
+    //   return;
+    // }
+    // getByCity(city: Destination['name']) {
+    //   return this.#destinations
+    //     .find((destination) => destination.name === city);
+    // }
 
-    const destination = this.#getDestinationByCity(city);
+    const currentDestination = this.#destinations.find((destination) => destination.name === city);
 
-    if(destination) {
+    if(currentDestination) {
       this.updateElement({
-        point: {
-          ...this._state.point,
-          destination: destination.id
-        },
-        destination
+        ...this._state,
+        destination: currentDestination.id
       });
     }
   };
@@ -279,10 +339,8 @@ export default class FormView extends AbstractStatefulView<State> {
     const offersIds = checkedOffers.map((offer: Element) => (offer as HTMLElement).dataset.offerId);
 
     this._setState({
-      point: {
-        ...this._state.point,
-        offers: offersIds
-      }
+      ...this._state,
+      offers: offersIds
     });
   };
 
@@ -290,28 +348,22 @@ export default class FormView extends AbstractStatefulView<State> {
     evt.preventDefault();
 
     this._setState({
-      point: {
-        ...this._state.point,
-        price: (evt.target as HTMLInputElement).valueAsNumber
-      }
+      ...this._state,
+      price: (evt.target as HTMLInputElement).valueAsNumber
     });
   };
 
-  #dateFromChangeHandler = ([userDate]: Date[]) => {
+  #dateFromChangeHandler = ([dateFrom]: Date[]) => {
     this.updateElement({
-      point: {
-        ...this._state.point,
-        dateFrom: userDate,
-      }
+      ...this._state,
+      dateFrom: dateFrom,
     });
   };
 
-  #dateToChangeHandler = ([userDate]: Date[]) => {
+  #dateToChangeHandler = ([dateTo]: Date[]) => {
     this.updateElement({
-      point: {
-        ...this._state.point,
-        dateTo: userDate,
-      }
+      ...this._state,
+      dateTo: dateTo,
     });
   };
 
@@ -321,8 +373,8 @@ export default class FormView extends AbstractStatefulView<State> {
       dateFrom,
       {
         dateFormat: 'd/m/y H:i',
-        defaultDate: this._state.point.dateFrom,
-        maxDate: this._state.point.dateTo,
+        defaultDate: this._state.dateFrom,
+        maxDate: this._state.dateTo,
         enableTime: true,
         'time_24hr': true,
         'locale': {
@@ -335,8 +387,8 @@ export default class FormView extends AbstractStatefulView<State> {
       dateTo,
       {
         dateFormat: 'd/m/y H:i',
-        defaultDate: this._state.point.dateTo,
-        minDate: this._state.point.dateFrom,
+        defaultDate: this._state.dateTo,
+        minDate: this._state.dateFrom,
         enableTime: true,
         'time_24hr': true,
         'locale': {
@@ -347,16 +399,16 @@ export default class FormView extends AbstractStatefulView<State> {
     );
   }
 
-  static parsePointToState(point: Point, destination: Destination) {
+  // static parsePointToState(point: Point, destination: Destination) {
+  static parsePointToState(point: Point) {
     return {
-      point: {...point},
-      destination
+      ...point
     };
   }
 
-  static parseStateToPoint(state: State) {
+  static parseStateToPoint(state: Point) {
     return {
-      ...state.point,
+      ...state,
     };
   }
 }

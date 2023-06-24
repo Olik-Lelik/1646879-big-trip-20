@@ -44,14 +44,17 @@ const FORMAT_DURATION = {
   'DDHHmm': 'DD[D] HH[H] mm[M]'
 } as const;
 
-type FilterType = 'everything' | 'future' | 'present' | 'past';
+type UserAction = 'update_point' | 'add_point' | 'delete_point';
+type UpdateType = 'patch' | 'minor' | 'major';
+
+type FilterType = 'EVERYTHING' | 'FUTURE' | 'PRESENT' | 'PAST';
 type PointFilter = (points: Point[]) => Point[];
 
 const filter: Record<FilterType, PointFilter> = {
-  'everything': (points: Point[]) => points,
-  'future': (points: Point[]) => points.filter(isPointFuture),
-  'present': (points: Point[]) => points.filter(isPointPresent),
-  'past': (points: Point[]) => points.filter(isPointPast),
+  'EVERYTHING': (points: Point[]) => points,
+  'FUTURE': (points: Point[]) => points.filter(isPointFuture),
+  'PRESENT': (points: Point[]) => points.filter(isPointPresent),
+  'PAST': (points: Point[]) => points.filter(isPointPast),
 };
 
 type SortType = 'day' | 'event' | 'time' | 'price' | 'offer';
@@ -70,4 +73,18 @@ const sort: Record<SortType, PointSort> = {
 };
 
 
-export {VALUE, TYPES, CITIES, DESCRIPTION, MSEC_IN_DAY, MSEC_IN_HOUR, FORMAT_DURATION, FilterType, filter, SortType, sort};
+export {
+  VALUE,
+  TYPES,
+  CITIES,
+  DESCRIPTION,
+  MSEC_IN_DAY,
+  MSEC_IN_HOUR,
+  FORMAT_DURATION,
+  UserAction,
+  UpdateType,
+  FilterType,
+  SortType,
+  filter,
+  sort
+};
