@@ -2,7 +2,7 @@ import {remove, render} from '../framework/render';
 import SortView from '../view/trip-sort';
 import ListView from '../view/trip-list';
 import PointPresenter from './point-presenter';
-import type {DestinationsModel, FilterModel, OffersModel, PointsModel} from '../model';
+import type {FilterModel, PointsModel} from '../model';
 import { Point } from '../types/types';
 import MessageView from '../view/message';
 import { FilterType, SortType, UpdateType, UserAction, filter, sort } from '../const';
@@ -11,8 +11,6 @@ import Loading from '../view/points-loading';
 
 interface Props {
   container: Element;
-  // destinationsModel: DestinationsModel,
-  // offersModel: OffersModel,
   pointsModel: PointsModel,
   filterModel: FilterModel,
   onNewPointDestroy(): void
@@ -22,8 +20,6 @@ export default class Presenter {
   #listViewComponent = new ListView();
   #loadingComponent = new Loading();
   #container: Element = null;
-  // #destinationsModel;
-  // #offersModel;
   #pointsModel;
   #filterModel;
   #sortComponent: SortView = null;
@@ -36,8 +32,6 @@ export default class Presenter {
 
   constructor({container, pointsModel, filterModel, onNewPointDestroy}: Props) {
     this.#container = container;
-    // this.#destinationsModel = destinationsModel;
-    // this.#offersModel = offersModel;
     this.#pointsModel = pointsModel;
     this.#filterModel = filterModel;
 
@@ -144,8 +138,6 @@ export default class Presenter {
     const pointPresenter = new PointPresenter({
       container: this.#listViewComponent.element,
       pointsModel: this.#pointsModel,
-      // destinationsModel: this.#pointsModel,
-      // offersModel: this.#offersModel,
       onDataChange: this.#handleViewAction,
       onModeChange: this.#handleModeChange,
     });

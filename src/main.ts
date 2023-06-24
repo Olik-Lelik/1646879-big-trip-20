@@ -1,7 +1,6 @@
 import TripInfo from './view/trip-info';
 import Presenter from './presenter/presenter';
-// import MockService from './service/mock-service';
-import {DestinationsModel, FilterModel, OffersModel, PointsModel} from './model';
+import {FilterModel, PointsModel} from './model';
 import { render } from './framework/render';
 import FilterPresenter from './presenter/filter-presenter';
 import NewPointButton from './view/new-button';
@@ -20,14 +19,10 @@ const pointsModel = new PointsModel({
   })
 });
 
-// const destinationsModel = new DestinationsModel(mock);
-// const offersModel = new OffersModel(mock);
 const filterModel = new FilterModel();
 
 const presenter = new Presenter({
   container: siteMainElement,
-  // destinationsModel,
-  // offersModel,
   pointsModel,
   filterModel,
   onNewPointDestroy: handleNewPointFormClose

@@ -9,8 +9,6 @@ import { UpdateType, UserAction } from '../const';
 interface Model {
   container: HTMLElement,
   pointsModel: PointsModel,
-  // destinationsModel: DestinationsModel,
-  // offersModel: OffersModel,
   onDataChange(userAction: UserAction, updateType: UpdateType, updatePoint: Point): void,
   onModeChange(): void,
 }
@@ -22,8 +20,6 @@ const enum Mode {
 export default class PointPresenter {
   #container: HTMLElement;
   #pointsModel: PointsModel;
-  // #destinations: DestinationsModel;
-  // #offers: OffersModel;
   #itemView: PointView | null = null;
   #itemEditView: FormView | null = null;
   #point: Point = null;
@@ -34,8 +30,6 @@ export default class PointPresenter {
   constructor({container, pointsModel, onDataChange, onModeChange}: Model) {
     this.#container = container;
     this.#pointsModel = pointsModel;
-    // this.#destinations = destinationsModel;
-    // this.#offers = offersModel;
     this.#pointChangeHandler = onDataChange;
     this.#modeChangeHandler = onModeChange;
   }
@@ -58,9 +52,6 @@ export default class PointPresenter {
       point,
       destinations: this.#pointsModel.destinations,
       offers: this.#pointsModel.offers,
-      // destination: this.#destinations.getById(point.destination),
-      // getDestinationByCity: this.#destinations.getByCity.bind(this.#destinations),
-      // getOffersByType: (type: OfferType) => this.#offers.getByType(type),
       typeForm: 'editing',
       onFormSubmit: this.#handleFormSubmit,
       onToggleClick: this.#replaceEditToPoint,
@@ -90,7 +81,6 @@ export default class PointPresenter {
   }
 
   resetView() {
-    // const isCurrentDestination = this.#destinations.getById(this.#point.destination);
     if(this.#mode !== Mode.DEFAULT) {
       this.#itemEditView.reset(this.#point);
       this.#replaceEditToPoint();
@@ -111,10 +101,8 @@ export default class PointPresenter {
   };
 
   #escKeyDownHandler = (evt: KeyboardEvent) => {
-    // const isCurrentDestination = this.#destinations.getById(this.#point.destination);
     if (evt.key === 'Escape' || evt.key === 'Esc') {
       evt.preventDefault();
-      // this.#itemEditView.reset(this.#point, isCurrentDestination);
       this.#itemEditView.reset(this.#point);
       this.#replaceEditToPoint();
       document.removeEventListener('keydown', this.#escKeyDownHandler);
