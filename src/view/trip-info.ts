@@ -18,11 +18,11 @@ function getCitiesSummary(cities: string[]) {
 
   if (cities.length > 3) {
     uniqueCities.push('...');
-    uniqueCities.push(lastCity);
+    uniqueCities.push(lastCity!);
   }
 
   if (lastCity !== uniqueCities.at(-1)) {
-    uniqueCities.push(lastCity);
+    uniqueCities.push(lastCity!);
   }
 
   return uniqueCities;
@@ -47,14 +47,15 @@ function createTemplate({dateFrom, dateTo, price, cities}: Props) {
 
 
 export default class InfoView extends AbstractView {
-  #props: Props = null;
-  constructor(props:Props) {
+  #props: Props | null = null;
+  constructor(props: Props) {
     super();
     this.#props = props;
+
   }
 
   get template() {
-    return createTemplate(this.#props);
+    return createTemplate(this.#props!);
   }
 
 }

@@ -25,7 +25,7 @@ function createTemplate({point, currentDestination, currentOffers}: GeneralProps
   const {price, dateFrom, dateTo, favorite, type} = point;
 
   const hasFavorite = favorite ? '--active' : '';
-  const checkedOffers = point.offers.map((offerId: OfferItem['id']) => currentOffers.find(({id}) => id === offerId));
+  const checkedOffers = point.offers.map((offerId: OfferItem['id']) => currentOffers.find(({id}) => id === offerId)) as OfferItem[];
 
   return `<li class="trip-events__item">
   <div class="event">
@@ -65,7 +65,7 @@ function createTemplate({point, currentDestination, currentOffers}: GeneralProps
 export default class PointView extends AbstractView {
   #point: Point;
   #currentDestination: Destination;
-  #currentOffers: OfferItem[] = null;
+  #currentOffers: OfferItem[] = [];
   #onEditClick: () => void;
   #onFavoriteClick: () => void;
 
@@ -77,10 +77,8 @@ export default class PointView extends AbstractView {
     this.#onEditClick = onEditClick;
     this.#onFavoriteClick = onFavoriteClick;
 
-    this.element.querySelector<HTMLButtonElement>('.event__rollup-btn')
-      .addEventListener('click', this.#editClickHandler);
-    this.element.querySelector<HTMLButtonElement>('.event__favorite-btn')
-      .addEventListener('click', this.#favoriteClickHandler);
+    this.element.querySelector<HTMLButtonElement>('.event__rollup-btn')?.addEventListener('click', this.#editClickHandler);
+    this.element.querySelector<HTMLButtonElement>('.event__favorite-btn')?.addEventListener('click', this.#favoriteClickHandler);
   }
 
   get template() {

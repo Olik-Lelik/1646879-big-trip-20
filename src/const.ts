@@ -1,5 +1,6 @@
 import { Point } from './types/types';
-import { getDayDifference, getPriceDifference, getTimeDifference, isPointFuture, isPointPast, isPointPresent } from './utils';
+import { dayjs, getDayDifference, getPriceDifference, getTimeDifference, isPointFuture, isPointPast, isPointPresent } from './utils';
+import type { ServiceProps } from './service';
 
 const VALUE = 4;
 
@@ -35,8 +36,8 @@ const CITIES = [
 
 const DESCRIPTION = 'Phasellus eros mauris, condimentum sed nibh vitae, sodales efficitur ipsum. Sed blandit, eros vel aliquam faucibus, purus ex euismod diam, eu luctus nunc ante ut dui. Sed sed nisi sed augue convallis suscipit in sed felis. Aliquam erat volutpat. Nunc fermentum tortor ac porta dapibus. In rutrum ac purus sit amet tempus.';
 
-const MSEC_IN_HOUR = 3600000;
-const MSEC_IN_DAY = 86400000;
+const MSEC_IN_HOUR = 3_600_000;
+const MSEC_IN_DAY = 86_400_000;
 
 const FORMAT_DURATION = {
   'mm': 'mm[M]',
@@ -79,6 +80,21 @@ const sort: Record<SortType, PointSort> = {
   },
 };
 
+const SERVICE_OPTIONS: ServiceProps = {
+  endPoint: 'https://20.ecmascript.pages.academy/big-trip',
+  authorization: 'Basic hfyiki846vnndh'
+} as const;
+
+const POINT_EMPTY: Point = {
+  id: '',
+  price: 0,
+  dateFrom: new Date(),
+  dateTo: dayjs().add(5, 'month').toDate(),
+  destination: '',
+  favorite: false,
+  offers: [],
+  type: TYPES[0],
+};
 
 export {
   VALUE,
@@ -88,10 +104,12 @@ export {
   MSEC_IN_DAY,
   MSEC_IN_HOUR,
   FORMAT_DURATION,
+  SERVICE_OPTIONS,
   UserAction,
   UpdateType,
   FilterType,
   SortType,
   filter,
-  sort
+  sort,
+  POINT_EMPTY
 };

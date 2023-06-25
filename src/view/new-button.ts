@@ -4,8 +4,9 @@ interface Button {
   onClick(): void;
 }
 
-export default class NewPointButton extends AbstractView {
+export default class NewPointButton extends AbstractView<HTMLButtonElement> {
   #handleClick: () => void | null;
+
 
   constructor({onClick}: Button) {
     super();

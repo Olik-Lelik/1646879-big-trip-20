@@ -121,5 +121,6 @@ export {
   updatePoint,
   getDayDifference,
   getTimeDifference,
-  getPriceDifference
+  getPriceDifference,
+  dayjs
 };

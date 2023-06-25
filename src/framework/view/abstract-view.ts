@@ -16,9 +16,9 @@ const enum SnakeAnimation {
 /**
  * Абстрактный класс представления
  */
-export default class AbstractView {
+export default class AbstractView<El extends HTMLElement = HTMLElement> {
   /** Элемент представления */
-  #element: HTMLElement | null = null;
+  #element: El | null = null;
 
   constructor() {
     if (new.target === AbstractView) {
@@ -32,7 +32,7 @@ export default class AbstractView {
    */
   get element() {
     if (!this.#element) {
-      this.#element = createElement(this.template);
+      this.#element = createElement(this.template) as El;
     }
 
     return this.#element;

@@ -4,19 +4,19 @@ import {FilterModel, PointsModel} from './model';
 import { render } from './framework/render';
 import FilterPresenter from './presenter/filter-presenter';
 import NewPointButton from './view/new-button';
-import PointsApiService from './view/points-api-service';
+import BigTripService from './service';
+import { SERVICE_OPTIONS } from './const';
 
 const siteHeaderElement = document.querySelector<HTMLElement>('.trip-main');
 const siteMainElement = document.querySelector<HTMLElement>('.trip-events');
+const filtersContainerElement = document.querySelector<HTMLElement>('.trip-controls__filters');
 
-const AUTHORIZATION = 'Basic hfyiki846vnndh' as const;
-const END_POINT = 'https://20.ecmascript.pages.academy/big-trip' as const;
+if (!siteMainElement || !siteHeaderElement || !filtersContainerElement) {
+  throw new Error('Important site elements were not found on the page. Correct site work is not garanteed.');
+}
 
 const pointsModel = new PointsModel({
-  service: new PointsApiService({
-    endPoint: END_POINT,
-    authorization: AUTHORIZATION,
-  })
+  service: new BigTripService(SERVICE_OPTIONS)
 });
 
 const filterModel = new FilterModel();
@@ -29,7 +29,7 @@ const presenter = new Presenter({
 });
 
 const filterPresenter = new FilterPresenter({
-  container: siteHeaderElement,
+  container: filtersContainerElement,
   pointsModel,
   filterModel,
 });
@@ -39,15 +39,13 @@ const newPointButtonComponent = new NewPointButton({
 });
 
 function handleNewPointFormClose() {
-  (newPointButtonComponent.element as HTMLButtonElement).disabled = false;
+  newPointButtonComponent.element.disabled = false;
 }
 
 function handleNewPointFormOpen() {
   presenter.createNewPoint();
-  (newPointButtonComponent.element as HTMLButtonElement).disabled = true;
+  newPointButtonComponent.element.disabled = true;
 }
-
-render(siteHeaderElement, newPointButtonComponent);
 
 render(siteHeaderElement, new TripInfo({
   cities: ['Moscow', 'Saint-Petersburg', 'Kazan'],
@@ -56,7 +54,10 @@ render(siteHeaderElement, new TripInfo({
   price: 1000,
 }), 'afterbegin');
 
-pointsModel.init();
+pointsModel.init()
+  .finally(() => {
+    render(siteHeaderElement, newPointButtonComponent);
+  });
 
 filterPresenter.init();
 presenter.init();

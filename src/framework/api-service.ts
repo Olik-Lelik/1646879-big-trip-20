@@ -1,31 +1,40 @@
+export type Method = 'GET' | 'PUT' | 'POST' | 'DELETE';
+
+interface Config {
+  /** Адрес относительно сервера */
+  url: string;
+  /** Метод запроса */
+  method?: Method;
+  /** Тело запроса */
+  body?: string | null;
+  /** Заголовки запроса */
+  headers?: Headers;
+}
+
 /**
  * Класс для отправки запросов к серверу
  */
 export default class ApiService {
+  _endPoint: string;
+  _authorization: string;
   /**
-   * @param {string} endPoint Адрес сервера
-   * @param {string} authorization Авторизационный токен
+   * @param endPoint Адрес сервера
+   * @param authorization Авторизационный токен
    */
-  constructor(endPoint, authorization) {
+  constructor(endPoint: string, authorization: string) {
     this._endPoint = endPoint;
     this._authorization = authorization;
   }
 
   /**
    * Метод для отправки запроса к серверу
-   * @param {Object} config Объект с настройками
-   * @param {string} config.url Адрес относительно сервера
-   * @param {string} [config.method] Метод запроса
-   * @param {string} [config.body] Тело запроса
-   * @param {Headers} [config.headers] Заголовки запроса
-   * @returns {Promise<Response>}
    */
   async _load({
     url,
     method = 'GET',
     body = null,
     headers = new Headers(),
-  }) {
+  }: Config) {
     headers.append('Authorization', this._authorization);
 
     const response = await fetch(
@@ -35,18 +44,21 @@ export default class ApiService {
 
     try {
       ApiService.checkStatus(response);
-      return response;
     } catch (err) {
-      ApiService.catchError(err);
+      if (err instanceof Error) {
+        ApiService.catchError(err);
+      }
     }
+
+    return response;
   }
 
   /**
    * Метод для обработки ответа
-   * @param {Response} response Объект ответа
+   * @param  response Объект ответа
    * @returns {Promise}
    */
-  static parseResponse(response) {
+  static parseResponse(response: Response) {
     return response.json();
   }
 
@@ -54,7 +66,7 @@ export default class ApiService {
    * Метод для проверки ответа
    * @param {Response} response Объект ответа
    */
-  static checkStatus(response) {
+  static checkStatus(response: Response) {
     if (!response.ok) {
       throw new Error(`${response.status}: ${response.statusText}`);
     }
@@ -62,9 +74,9 @@ export default class ApiService {
 
   /**
    * Метод для обработки ошибок
-   * @param {Error} err Объект ошибки
+   * @param err Объект ошибки
    */
-  static catchError(err) {
+  static catchError(err: Error) {
     throw err;
   }
 }

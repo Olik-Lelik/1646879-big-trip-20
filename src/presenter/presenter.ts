@@ -19,14 +19,14 @@ interface Props {
 export default class Presenter {
   #listViewComponent = new ListView();
   #loadingComponent = new Loading();
-  #container: Element = null;
-  #pointsModel;
-  #filterModel;
-  #sortComponent: SortView = null;
+  #container: Element | null = null;
+  #pointsModel: PointsModel;
+  #filterModel: FilterModel;
+  #sortComponent: SortView | null = null;
   #pointPresenters: Map<Point['id'], PointPresenter> = new Map();
   #currentSortType: SortType = 'day';
   #currentFilterType: FilterType = 'EVERYTHING';
-  #messageComponent: MessageView = null;
+  #messageComponent: MessageView | null = null;
   #newPointPresenter: NewPointPresenter;
   #isLoading = true;
 
@@ -37,8 +37,9 @@ export default class Presenter {
 
     this.#newPointPresenter = new NewPointPresenter({
       container: this.#listViewComponent.element,
-      destinations: this.#pointsModel.destinations,
-      offers: this.#pointsModel.offers,
+      pointsModel: this.#pointsModel,
+      // destinations: this.#pointsModel.destinations,
+      // offers: this.#pointsModel.offers,
       onDataChange: this.#handleViewAction,
       onDestroy: onNewPointDestroy
     });
@@ -47,7 +48,7 @@ export default class Presenter {
     this.#filterModel.addObserver(this.#handleModelEvent);
   }
 
-  get points(): Point[] {
+  get points() {
     this.#currentFilterType = this.#filterModel.filter;
     const points = this.#pointsModel.points;
     const createFilteredPoints = filter[this.#currentFilterType](points);
@@ -88,7 +89,7 @@ export default class Presenter {
   #handleModelEvent = (updateType: UpdateType, updatedPoint: Point) => {
     switch (updateType) {
       case 'patch':
-        this.#pointPresenters.get(updatedPoint.id).init(updatedPoint);
+        this.#pointPresenters.get(updatedPoint.id)?.init(updatedPoint);
         break;
       case 'minor':
         this.#clearPointsList();
@@ -150,6 +151,7 @@ export default class Presenter {
     this.#pointPresenters.forEach((presenter: PointPresenter) => presenter.destroy());
     this.#pointPresenters.clear();
 
+
     remove(this.#sortComponent);
     // remove(this.#loadingComponent);
 
@@ -162,19 +164,26 @@ export default class Presenter {
     }
   }
 
-  #renderPointsList() {
-    if(!this.points.length) {
-      this.#renderMessage();
-      return;
-    }
-
-    if(this.#isLoading) {
-      this.#renderLoadingComponent();
-      return;
-    }
-
-    this.#renderSort();
+  #renderPoints() {
     this.points.forEach((point) => this.#renderPoint(point));
     render(this.#container as HTMLElement, this.#listViewComponent);
+
+  }
+
+  #renderPointsList() {
+    render(this.#container as HTMLElement, this.#listViewComponent);
+
+
+    if(this.#isLoading) {
+      return this.#renderLoadingComponent();
+    }
+
+    if(!this.points.length) {
+      return this.#renderMessage();
+    }
+
+
+    this.#renderSort();
+    this.#renderPoints();
   }
 }

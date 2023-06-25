@@ -32,8 +32,8 @@ type FilterProps = Filter & {
   onFilterTypeChange(filterType: FilterType): void,
 }
 export default class FiltersView extends AbstractView {
-  #filters: FilterItem[] = null;
-  #currentFilterType: FilterType = null;
+  #filters: FilterItem[] = [];
+  #currentFilterType: FilterType = 'EVERYTHING';
   #onFilterTypeChange: (filterType: FilterType) => void;
 
   constructor({filters, currentFilterType, onFilterTypeChange}: FilterProps) {

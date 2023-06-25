@@ -1,5 +1,6 @@
 /** bФункция, которая будет вызвана при наступлении события */
-type ObserverCallback = (event: unknown, payload?: unknown) => void;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type ObserverCallback = (event: any, payload?: any) => void;
 
 /** Класс, реализующий паттерн Наблюдатель. */
 export default class Observable {
