@@ -56,7 +56,7 @@ function replace(newComponent: AbstractView, oldComponent: AbstractView) {
  * Функция для удаления компонента
  * @param component Компонент, который нужно удалить
  */
-function remove(component: AbstractView) {
+function remove(component: AbstractView | null) {
   if (component === null) {
     return;
   }

@@ -5,7 +5,7 @@ import AbstractView from './abstract-view';
  */
 export default class AbstractStatefulView<State> extends AbstractView {
   /** Объект состояния */
-  _state: State = null;
+  _state = {} as State;
 
   /**
    * Метод для обновления состояния и перерисовки элемента
@@ -45,7 +45,7 @@ export default class AbstractStatefulView<State> extends AbstractView {
 
     const newElement = this.element;
 
-    parent.replaceChild(newElement, prevElement);
+    parent?.replaceChild(newElement, prevElement);
 
     this._restoreHandlers();
   }

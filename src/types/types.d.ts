@@ -1,7 +1,6 @@
-import { TYPES, CITIES, FilterType } from '../const';
+import { FilterType, TYPES } from '../const';
 
 type OfferType = typeof TYPES[number];
-type City = typeof CITIES[number];
 
 interface Picture {
   src: string;
@@ -11,7 +10,7 @@ interface Picture {
 interface Destination {
   id: string;
   description: string;
-  name: City;
+  name: string;
   pictures: Picture[];
 }
 
@@ -34,6 +33,30 @@ interface Point {
   destination: string,
   favorite: boolean,
   offers: OfferItem['id'][],
+  type: OfferType,
+}
+
+interface State {
+  id: string,
+  price: number,
+  dateFrom: Date,
+  dateTo: Date,
+  destination: string,
+  favorite: boolean,
+  offers: OfferItem['id'][],
+  type: OfferType,
+  isSaving: boolean,
+  isDisabled: boolean,
+  isDeleting: boolean
+}
+interface PointService {
+  id: string,
+  base_price: number,
+  date_from: string | null,
+  date_to: string | null,
+  destination: string,
+  is_favorite: boolean,
+  offers: OfferItem['id'][],
   type: OfferType
 }
 
@@ -42,4 +65,4 @@ interface Filter {
   count: number
 }
 
-export { OfferType, City, Destination, Picture, OfferItem, Offer, Point, Filter };
+export { Destination, Picture, OfferItem, Offer, Point, Filter, PointService, State};
