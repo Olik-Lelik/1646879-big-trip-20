@@ -1,3 +1,4 @@
+import dayjs from 'dayjs';
 import { POINT_EMPTY, UpdateType, UserAction } from '../const';
 import { remove, render } from '../framework/render';
 import { PointsModel } from '../model';
@@ -18,7 +19,7 @@ interface NewPointForm {
 export default class NewPointPresenter {
   #container: HTMLElement | null = null;
   #pointsModel: PointsModel;
-  #waypointCreationForm: FormView | null = null;
+  #waypointCreationForm: FormView = null;
   #handleDataChange: (
     userAction: UserAction,
     updateType: UpdateType,
@@ -44,12 +45,31 @@ export default class NewPointPresenter {
       destinations:  this.#pointsModel.destinations,
       offers: this.#pointsModel.offers,
       status: 'CREATING',
-      onFormSubmit: this.#handleFormSubmit,
-      onFormReset: this.#handleFormClose,
+      handleFormSubmit: this.#handleFormSubmit,
+      handleFormReset: this.#handleFormClose,
     });
 
     render(this.#container, this.#waypointCreationForm, 'afterbegin');
     document.addEventListener('keydown', this.#escKeyDownHandler);
+  }
+
+  setSaving() {
+    this.#waypointCreationForm.updateElement({
+      isDisabled: true,
+      isSaving: true,
+    });
+  }
+
+  setAborting() {
+    const resetFormState = () => {
+      this.#waypointCreationForm.updateElement({
+        isSaving: false,
+        isDeleting: false,
+        isDisabled: false
+      });
+    };
+
+    this.#waypointCreationForm.shake(resetFormState);
   }
 
   destroy() {
@@ -66,6 +86,13 @@ export default class NewPointPresenter {
   }
 
   #handleFormSubmit = (point: Point) => {
+    if (
+      !point.destination || !point.dateFrom || !point.dateTo || !point.price ||
+      dayjs(point.dateTo) < dayjs(point.dateFrom)
+    ) {
+      this.#waypointCreationForm.shake();
+      return;
+    }
     this.#handleDataChange('add_point', 'minor', point);
     this.destroy();
   };

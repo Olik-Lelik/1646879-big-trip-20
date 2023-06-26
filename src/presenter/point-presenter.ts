@@ -34,13 +34,13 @@ export default class PointPresenter {
     updatePoint: Point
   ) => void;
 
-  #modeChangeHandler: () => void;
+  #handleModeChange: () => void;
 
   constructor({ container, pointsModel, onDataChange, onModeChange }: Model) {
     this.#container = container;
     this.#pointsModel = pointsModel;
     this.#pointChangeHandler = onDataChange;
-    this.#modeChangeHandler = onModeChange;
+    this.#handleModeChange = onModeChange;
   }
 
   init(point: Point) {
@@ -54,7 +54,7 @@ export default class PointPresenter {
       currentDestination: this.#pointsModel.getById(point.destination),
       currentOffers: this.#pointsModel.getByType(point.type),
       onEditClick: this.#replacePointToEdit,
-      onFavoriteClick: this.#favoriteClickHandler,
+      onFavoriteClick: this.#handleFavoriteClick,
     });
 
     this.#itemEditView = new FormView({
@@ -62,9 +62,9 @@ export default class PointPresenter {
       destinations: this.#pointsModel.destinations,
       offers: this.#pointsModel.offers,
       status: 'EDITING',
-      onFormSubmit: this.#handleFormSubmit,
-      onToggleClick: this.#replaceEditToPoint,
-      onFormReset: this.#handlePointDelete,
+      handleFormSubmit: this.#handleFormSubmit,
+      handleToggleClick: this.#replaceEditToPoint,
+      handleFormReset: this.#handlePointDelete,
     });
 
     if (prevItemView === null || prevEditView === null) {
@@ -77,10 +77,46 @@ export default class PointPresenter {
 
     if (this.#mode === Mode.EDITING) {
       replace(this.#itemEditView, prevEditView);
+      this.#mode = Mode.DEFAULT;
     }
 
     remove(prevItemView);
     remove(prevEditView);
+  }
+
+  setSaving() {
+    if (this.#mode === Mode.EDITING) {
+      this.#itemEditView.updateElement({
+        isSaving: true,
+        isDisabled: true
+      });
+    }
+  }
+
+  setDeleting() {
+    if (this.#mode === Mode.EDITING) {
+      this.#itemEditView.updateElement({
+        isDeleting: true,
+        isDisabled: true
+      });
+    }
+  }
+
+  setAborting() {
+    if(this.#mode === Mode.DEFAULT) {
+      this.#itemView.shake();
+      return;
+    }
+
+    const resetFormState = () => {
+      this.#itemEditView.updateElement({
+        isSaving: false,
+        isDeleting: false,
+        isDisabled: false
+      });
+    };
+
+    this.#itemEditView.shake(resetFormState);
   }
 
   destroy() {
@@ -90,7 +126,7 @@ export default class PointPresenter {
 
   resetView() {
     if (this.#mode !== Mode.DEFAULT) {
-      this.#itemEditView?.reset(this.#point);
+      this.#itemEditView.reset(this.#point);
       this.#replaceEditToPoint();
     }
   }
@@ -98,7 +134,7 @@ export default class PointPresenter {
   #replacePointToEdit = () => {
     replace(this.#itemEditView, this.#itemView);
     document.addEventListener('keydown', this.#escKeyDownHandler);
-    this.#modeChangeHandler();
+    this.#handleModeChange();
     this.#mode = Mode.EDITING;
   };
 
@@ -117,7 +153,7 @@ export default class PointPresenter {
     }
   };
 
-  #favoriteClickHandler = () => {
+  #handleFavoriteClick = () => {
     this.#pointChangeHandler('update_point', 'patch', {
       ...this.#point,
       favorite: !this.#point.favorite,

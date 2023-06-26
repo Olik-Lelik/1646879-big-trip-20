@@ -1,20 +1,15 @@
 import { TYPES } from '../const';
 import AbstractStatefulView from '../framework/view/abstract-stateful-view';
-import { Destination, Offer, OfferItem, Picture, Point } from '../types/types';
+import { Destination, Offer, OfferItem, Picture, Point, State } from '../types/types';
 import flatpickr from 'flatpickr';
 import he from 'he';
 
 import 'flatpickr/dist/flatpickr.min.css';
 
-const ButtonName = {
-  EDITING: 'Delete',
-  CREATING: 'Cancel',
-};
-
 type EditType = 'EDITING' | 'CREATING';
 
 interface GeneralProps {
-  state: Point;
+  state: State;
   destinations: Destination[];
   offers: Offer[];
   status: EditType;
@@ -24,21 +19,18 @@ interface FormViewProps {
   destinations: Destination[];
   offers: Offer[];
   status: EditType;
-  onToggleClick?(): void;
-  onFormSubmit(point: Point): void;
-  onFormReset(point?: Point): void;
+  handleToggleClick?(): void;
+  handleFormSubmit(point: Point): void;
+  handleFormReset(point?: Point): void;
 }
 
-function createRollupButton(type: EditType) {
+function createFormButtons(type: EditType, {isDeleting, isDisabled}: State) {
   if (type === 'CREATING') {
-    return '';
+    return `<button class="event__reset-btn" type="reset" ${isDisabled ? 'disabled' : ''}>Cancel</button>`;
+  } else {
+    return `<button class="event__reset-btn" type="reset" ${isDisabled ? 'disabled' : ''}>${isDeleting ? 'Deleting...' : 'Delete'}</button>
+    <button class="event__rollup-btn" type="button" ${isDisabled ? 'disabled' : ''}>  <span class="visually-hidden">Open event</span></button>`;
   }
-  return '<button class="event__rollup-btn" type="button">  <span class="visually-hidden">Open event</span></button>';
-}
-function createFormButtons(type: EditType) {
-  return `<button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
-<button class="event__reset-btn" type="reset">${ButtonName[type]}</button>
-  ${createRollupButton(type)}`;
 }
 
 function createDestinationOption({ name }: Destination) {
@@ -116,7 +108,7 @@ function createEventDestinationSection(destination: Destination) {
 }
 
 function createTemplate({ state, destinations, offers, status }: GeneralProps) {
-  const { price, dateFrom, dateTo } = state;
+  const { price, dateFrom, dateTo, isSaving, isDisabled } = state;
 
   const currentDestination = destinations.find((element) => element.id === state.destination);
   const currentOffers = offers?.find((element) => element.type === state.type)?.offers || [];
@@ -145,9 +137,7 @@ function createTemplate({ state, destinations, offers, status }: GeneralProps) {
     <label class="event__label  event__type-output" for="event-destination-1">
     ${state.type}
     </label>
-    <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${he.encode(
-    currentDestination ? currentDestination.name : ''
-  )}" list="destination-list-1">
+    <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${currentDestination ? he.encode(currentDestination.name) : ''}" list="destination-list-1">
     <datalist id="destination-list-1">
       ${destinations.map(createDestinationOption).join('')}
     </datalist>
@@ -168,8 +158,8 @@ function createTemplate({ state, destinations, offers, status }: GeneralProps) {
     </label>
     <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${price}">
   </div>
-
-  ${createFormButtons(status)}
+  <button class="event__save-btn  btn  btn--blue" type="submit" ${isDisabled ? 'disabled' : ''}>${isSaving ? 'Saving...' : 'Save'}</button>
+  ${createFormButtons(status, state)}
   </header>
   <section class="event__details">
   ${createEventOffersSection(currentOffers, state)}
@@ -179,17 +169,17 @@ function createTemplate({ state, destinations, offers, status }: GeneralProps) {
   </li>`;
 }
 
-export default class FormView extends AbstractStatefulView<Point> {
+export default class FormView extends AbstractStatefulView<State> {
   #destinations: Destination[];
   #offers: Offer[];
   #status: EditType;
   #datePickerFrom: flatpickr.Instance | null = null;
   #datePickerTo: flatpickr.Instance | null = null;
-  #handleToggleClick: () => void;
-  #handleFormSubmit: (point: Point) => void;
-  #onFormReset: (point: Point) => void;
+  #handleToggleClick!: () => void;
+  #handleFormSubmit: (point: State) => void;
+  #handleFormReset: (point: State) => void;
 
-  constructor({point, destinations, offers, onToggleClick, onFormSubmit, onFormReset, status}: FormViewProps) {
+  constructor({point, destinations, offers, handleToggleClick, handleFormSubmit, handleFormReset, status}: FormViewProps) {
     super();
     const isCreating = status === 'CREATING';
     const isEditing = !isCreating;
@@ -199,13 +189,13 @@ export default class FormView extends AbstractStatefulView<Point> {
     this.#offers = offers;
     this.#status = status;
 
-    this.#onFormReset = onFormReset;
+    this.#handleFormReset = handleFormReset;
 
     if (isEditing) {
-      this.#handleToggleClick = onToggleClick;
+      this.#handleToggleClick = handleToggleClick;
     }
 
-    this.#handleFormSubmit = onFormSubmit;
+    this.#handleFormSubmit = handleFormSubmit;
 
     this._restoreHandlers();
   }
@@ -217,7 +207,7 @@ export default class FormView extends AbstractStatefulView<Point> {
     form.addEventListener('reset', this.#formResetHandler);
 
     if (this.#status === 'EDITING') {
-      form.querySelector<HTMLButtonElement>('.event__rollup-btn').addEventListener('click', this.#handleToggleClick);
+      form.querySelector<HTMLButtonElement>('.event__rollup-btn')?.addEventListener('click', this.#handleToggleClick);
     }
 
     form
@@ -241,6 +231,7 @@ export default class FormView extends AbstractStatefulView<Point> {
 
   get template() {
     const state = this._state;
+
     return createTemplate({
       state,
       offers: this.#offers,
@@ -269,7 +260,7 @@ export default class FormView extends AbstractStatefulView<Point> {
 
   #formResetHandler = (evt: Event) => {
     evt.preventDefault();
-    return this.#onFormReset(FormView.parseStateToPoint(this._state));
+    return this.#handleFormReset(FormView.parseStateToPoint(this._state));
   };
 
   #formSubmitHandler = (evt: SubmitEvent) => {
@@ -377,14 +368,21 @@ export default class FormView extends AbstractStatefulView<Point> {
   }
 
   static parsePointToState(point: Point) {
-    return{
-      ...point
+    return {
+      ...point,
+      isSaving: false,
+      isDisabled: false,
+      isDeleting: false
     };
   }
 
-  static parseStateToPoint(state: Point) {
-    return {
-      ...state
-    };
+  static parseStateToPoint(state: State) {
+    const point = state;
+
+    delete point.isSaving;
+    delete point.isDisabled;
+    delete point.isDeleting;
+
+    return point;
   }
 }

@@ -1,8 +1,6 @@
-import { Point } from './types/types';
+import { Point, State } from './types/types';
 import { dayjs, getDayDifference, getPriceDifference, getTimeDifference, isPointFuture, isPointPast, isPointPresent } from './utils';
 import type { ServiceProps } from './service';
-
-const VALUE = 4;
 
 const TYPES = [
   'taxi',
@@ -15,26 +13,6 @@ const TYPES = [
   'sightseeing',
   'restaurant'
 ] as const;
-
-const CITIES = [
-  'Monaco',
-  'Tokio',
-  'Amsterdam',
-  'Paris',
-  'Yerevan',
-  'Vienna',
-  'Minsk',
-  'Santiago',
-  'Havana',
-  'Rome',
-  'London',
-  'Berlin',
-  'Madrid',
-  'Prague',
-  'Moscow',
-] as const;
-
-const DESCRIPTION = 'Phasellus eros mauris, condimentum sed nibh vitae, sodales efficitur ipsum. Sed blandit, eros vel aliquam faucibus, purus ex euismod diam, eu luctus nunc ante ut dui. Sed sed nisi sed augue convallis suscipit in sed felis. Aliquam erat volutpat. Nunc fermentum tortor ac porta dapibus. In rutrum ac purus sit amet tempus.';
 
 const MSEC_IN_HOUR = 3_600_000;
 const MSEC_IN_DAY = 86_400_000;
@@ -82,7 +60,7 @@ const sort: Record<SortType, PointSort> = {
 
 const SERVICE_OPTIONS: ServiceProps = {
   endPoint: 'https://20.ecmascript.pages.academy/big-trip',
-  authorization: 'Basic hfyiki846vnndh'
+  authorization: 'Basic hfyiki846vnndgx'
 } as const;
 
 const POINT_EMPTY: Point = {
@@ -96,11 +74,22 @@ const POINT_EMPTY: Point = {
   type: TYPES[0],
 };
 
+const STATE: State = {
+  id: '',
+  price: 0,
+  dateFrom: new Date(),
+  dateTo: dayjs().add(5, 'month').toDate(),
+  destination: '',
+  favorite: false,
+  offers: [],
+  type: TYPES[0],
+  isSaving: false,
+  isDisabled: false,
+  isDeleting: false
+};
+
 export {
-  VALUE,
   TYPES,
-  CITIES,
-  DESCRIPTION,
   MSEC_IN_DAY,
   MSEC_IN_HOUR,
   FORMAT_DURATION,
@@ -111,5 +100,6 @@ export {
   SortType,
   filter,
   sort,
-  POINT_EMPTY
+  POINT_EMPTY,
+  STATE
 };

@@ -54,10 +54,10 @@ render(siteHeaderElement, new TripInfo({
   price: 1000,
 }), 'afterbegin');
 
+filterPresenter.init();
+presenter.init();
 pointsModel.init()
   .finally(() => {
     render(siteHeaderElement, newPointButtonComponent);
   });
 
-filterPresenter.init();
-presenter.init();
