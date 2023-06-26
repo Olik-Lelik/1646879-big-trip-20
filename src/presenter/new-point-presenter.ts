@@ -1,4 +1,3 @@
-import dayjs from 'dayjs';
 import { POINT_EMPTY, UpdateType, UserAction } from '../const';
 import { remove, render } from '../framework/render';
 import { PointsModel } from '../model';

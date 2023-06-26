@@ -5,7 +5,6 @@ import flatpickr from 'flatpickr';
 import he from 'he';
 
 import 'flatpickr/dist/flatpickr.min.css';
-import dayjs from 'dayjs';
 
 type EditType = 'EDITING' | 'CREATING';
 
