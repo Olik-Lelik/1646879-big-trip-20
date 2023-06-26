@@ -178,7 +178,6 @@ export default class Presenter {
     this.#pointPresenters.forEach((presenter: PointPresenter) => presenter.destroy());
     this.#pointPresenters.clear();
 
-
     remove(this.#sortComponent);
     // remove(this.#loadingComponent);
 
@@ -208,7 +207,6 @@ export default class Presenter {
     if(!this.points.length) {
       return this.#renderMessage();
     }
-
 
     this.#renderSort();
     this.#renderPoints();
