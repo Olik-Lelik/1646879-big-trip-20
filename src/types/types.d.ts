@@ -1,8 +1,6 @@
-// import { TYPES, CITIES, FilterType } from '../const';
 import { FilterType, TYPES } from '../const';
 
 type OfferType = typeof TYPES[number];
-// type City = typeof CITIES[number];
 
 interface Picture {
   src: string;
