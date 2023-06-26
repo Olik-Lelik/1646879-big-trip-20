@@ -1,4 +1,3 @@
-import dayjs from 'dayjs';
 import { POINT_EMPTY, UpdateType, UserAction } from '../const';
 import { remove, render } from '../framework/render';
 import { PointsModel } from '../model';
@@ -45,8 +44,8 @@ export default class NewPointPresenter {
       destinations:  this.#pointsModel.destinations,
       offers: this.#pointsModel.offers,
       status: 'CREATING',
-      handleFormSubmit: this.#handleFormSubmit,
-      handleFormReset: this.#handleFormClose,
+      onFormSubmit: this.#handleFormSubmit,
+      onFormReset: this.#handleFormClose,
     });
 
     render(this.#container, this.#waypointCreationForm, 'afterbegin');
@@ -86,15 +85,7 @@ export default class NewPointPresenter {
   }
 
   #handleFormSubmit = (point: Point) => {
-    if (
-      !point.destination || !point.dateFrom || !point.dateTo || !point.price ||
-      dayjs(point.dateTo) < dayjs(point.dateFrom)
-    ) {
-      this.#waypointCreationForm.shake();
-      return;
-    }
     this.#handleDataChange('add_point', 'minor', point);
-    this.destroy();
   };
 
   #handleFormClose = () => this.destroy();
