@@ -81,29 +81,32 @@ export default class Presenter {
 
   #handleViewAction = async (userAction: UserAction, updateType: UpdateType, updatedPoint: Point) => {
     this.#uiBlocker.block();
+    const currentPresenter = this.#pointPresenters.get(updatedPoint.id);
     switch (userAction) {
       case 'update_point':
-        this.#pointPresenters.get(updatedPoint.id).setSaving();
+        currentPresenter.setSaving();
         try {
           await this.#pointsModel.updatePoint(updateType, updatedPoint);
+          currentPresenter.onSuccessSaving();
         } catch(err) {
-          this.#pointPresenters.get(updatedPoint.id).setAborting();
+          currentPresenter.setAborting();
         }
         break;
       case 'add_point':
         this.#newPointPresenter.setSaving();
         try {
           await this.#pointsModel.addPoint(updateType, updatedPoint);
+          this.#newPointPresenter.destroy();
         } catch(err) {
           this.#newPointPresenter.setAborting();
         }
         break;
       case 'delete_point':
-        this.#pointPresenters.get(updatedPoint.id).setDeleting();
+        currentPresenter.setDeleting();
         try {
           await this.#pointsModel.deletePoint(updateType, updatedPoint);
         } catch(err) {
-          this.#pointPresenters.get(updatedPoint.id).setAborting();
+          currentPresenter.setAborting();
         }
         break;
     }

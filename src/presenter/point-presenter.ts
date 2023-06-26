@@ -5,7 +5,6 @@ import PointView from '../view/trip-point';
 import { PointsModel } from '../model';
 import { Point } from '../types/types.js';
 import { UpdateType, UserAction } from '../const';
-
 interface Model {
   container: HTMLElement;
   pointsModel: PointsModel;
@@ -62,9 +61,9 @@ export default class PointPresenter {
       destinations: this.#pointsModel.destinations,
       offers: this.#pointsModel.offers,
       status: 'EDITING',
-      handleFormSubmit: this.#handleFormSubmit,
-      handleToggleClick: this.#replaceEditToPoint,
-      handleFormReset: this.#handlePointDelete,
+      onFormSubmit: this.#handleFormSubmit,
+      onToggleClick: this.#replaceEditToPoint,
+      onFormReset: this.#handlePointDelete,
     });
 
     if (prevItemView === null || prevEditView === null) {
@@ -104,8 +103,7 @@ export default class PointPresenter {
 
   setAborting() {
     if(this.#mode === Mode.DEFAULT) {
-      this.#itemView.shake();
-      return;
+      return this.#itemView.shake();
     }
 
     const resetFormState = () => {
@@ -160,9 +158,10 @@ export default class PointPresenter {
     });
   };
 
+  onSuccessSaving = () => this.#replaceEditToPoint();
+
   #handleFormSubmit = (updatePoint: Point) => {
     this.#pointChangeHandler('update_point', 'minor', updatePoint);
-    this.#replaceEditToPoint();
   };
 
   #handlePointDelete = (point: Point) => {

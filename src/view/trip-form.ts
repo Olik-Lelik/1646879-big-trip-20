@@ -5,6 +5,7 @@ import flatpickr from 'flatpickr';
 import he from 'he';
 
 import 'flatpickr/dist/flatpickr.min.css';
+import dayjs from 'dayjs';
 
 type EditType = 'EDITING' | 'CREATING';
 
@@ -19,9 +20,9 @@ interface FormViewProps {
   destinations: Destination[];
   offers: Offer[];
   status: EditType;
-  handleToggleClick?(): void;
-  handleFormSubmit(point: Point): void;
-  handleFormReset(point?: Point): void;
+  onToggleClick?(): void;
+  onFormSubmit(point: Point): void;
+  onFormReset(point?: Point): void;
 }
 
 function createFormButtons(type: EditType, {isDeleting, isDisabled}: State) {
@@ -176,10 +177,10 @@ export default class FormView extends AbstractStatefulView<State> {
   #datePickerFrom: flatpickr.Instance | null = null;
   #datePickerTo: flatpickr.Instance | null = null;
   #handleToggleClick!: () => void;
-  #handleFormSubmit: (point: State) => void;
+  #handleFormSubmit: (point: State) => void = null;
   #handleFormReset: (point: State) => void;
 
-  constructor({point, destinations, offers, handleToggleClick, handleFormSubmit, handleFormReset, status}: FormViewProps) {
+  constructor({point, destinations, offers, onToggleClick, onFormSubmit, onFormReset, status}: FormViewProps) {
     super();
     const isCreating = status === 'CREATING';
     const isEditing = !isCreating;
@@ -189,13 +190,13 @@ export default class FormView extends AbstractStatefulView<State> {
     this.#offers = offers;
     this.#status = status;
 
-    this.#handleFormReset = handleFormReset;
+    this.#handleFormReset = onFormReset;
 
     if (isEditing) {
-      this.#handleToggleClick = handleToggleClick;
+      this.#handleToggleClick = onToggleClick;
     }
 
-    this.#handleFormSubmit = handleFormSubmit;
+    this.#handleFormSubmit = onFormSubmit;
 
     this._restoreHandlers();
   }
@@ -263,9 +264,18 @@ export default class FormView extends AbstractStatefulView<State> {
     return this.#handleFormReset(FormView.parseStateToPoint(this._state));
   };
 
+  #formValidate() {
+    const point = this._state;
+    return point.destination && point.dateFrom && point.dateTo && point.price && point.dateTo >= point.dateFrom;
+  }
+
   #formSubmitHandler = (evt: SubmitEvent) => {
     evt.preventDefault();
-    this.#handleFormSubmit(FormView.parseStateToPoint(this._state));
+    if (this.#formValidate()) {
+      return this.#handleFormSubmit(FormView.parseStateToPoint(this._state));
+    }
+
+    return this.shake();
   };
 
   #routeTypeHandler = (evt: Event) => {
