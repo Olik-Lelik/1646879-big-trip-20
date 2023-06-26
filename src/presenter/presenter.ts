@@ -174,7 +174,7 @@ export default class Presenter {
   }
 
   #clearPointsList({resetSortType = false} = {}) {
-    this.#newPointPresenter.destroy(); //new
+    this.#newPointPresenter.destroy();
     this.#pointPresenters.forEach((presenter: PointPresenter) => presenter.destroy());
     this.#pointPresenters.clear();
 
